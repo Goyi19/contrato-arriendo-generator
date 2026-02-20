@@ -1,0 +1,6 @@
+{
+  "name": "contrato-arriendo-generator",
+  "version": "1.0.0",
+  "description": "Generador inteligente de contratos de arriendo con Google Gemini API",
+  "private": true
+}
