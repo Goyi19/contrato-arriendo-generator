@@ -274,7 +274,17 @@ async function handleManualGenerate(e) {
         }
 
         showProgress('Generando archivo .docx...', 85, 'Creando documento idéntico a la plantilla original...');
-        const blob = await generateDocx(templateData, 'contrato');
+        let blob;
+        try {
+            blob = await generateDocx(templateData, 'contrato');
+        } catch (docxErr) {
+            console.error('Error en Docxtemplater:', docxErr);
+            if (docxErr.properties && docxErr.properties.errors) {
+                const multiError = docxErr.properties.errors.map(e => e.message).join(', ');
+                throw new Error(`Error en la plantilla: ${multiError}`);
+            }
+            throw docxErr;
+        }
 
         showProgress('¡Listo!', 100, '');
 
