@@ -191,3 +191,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         border-radius: 1rem;
     }
 }
+
+/* ── Custom Helpers ── */
+#oficinasContainer .office-row:not(:first-child) .remove-row,
+#estacionamientosContainer .parking-row:not(:first-child) .remove-row {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+.text-brand-400 { color: #818cf8; }
+.hover\:text-brand-300:hover { color: #a5b4fc; }

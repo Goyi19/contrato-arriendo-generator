@@ -223,97 +223,136 @@
                             class="text-xs font-semibold text-violet-400 uppercase tracking-wider flex items-center gap-2">
                             <span class="w-5 h-px bg-violet-500/50"></span> Propiedad — Edificio Business Center
                         </legend>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Oficina(s)</label>
-                                <input type="text" name="oficinas" required placeholder="Ej. 803 o 803 y 802"
-                                    class="input-field" />
-                            </div>
+                        <div class="space-y-4">
+                            <!-- Piso -->
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Piso (en texto)</label>
                                 <input type="text" name="piso" required placeholder="Ej. octavo piso"
-                                    class="input-field" />
+                                    class="input-field" value="octavo piso" />
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Estacionamiento(s)</label>
-                                <input type="text" name="estacionamientos" required placeholder="Ej. 195 o 195 y 196"
-                                    class="input-field" />
+
+                            <!-- Oficinas Container -->
+                            <div class="space-y-3">
+                                <label class="block text-xs font-medium text-gray-400">Oficinas y Superficies</label>
+                                <div id="oficinasContainer" class="space-y-2">
+                                    <div class="office-row flex gap-2 items-center">
+                                        <input type="text" name="oficina_num" required placeholder="Oficina (ej. 803)"
+                                            class="input-field flex-1" />
+                                        <input type="text" name="oficina_m2" required placeholder="M2 (ej. 32,00)"
+                                            class="input-field w-32" />
+                                        <button type="button"
+                                            class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors opacity-0 pointer-events-none">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="button" id="btnAddOffice"
+                                    class="text-xs font-medium text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Agregar otra oficina
+                                </button>
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Superficie</label>
-                                <input type="text" name="superficie" required
-                                    placeholder="Ej. 32,00 m2 o 32,00 y 20,81 m2" class="input-field" />
+
+                            <!-- Estacionamientos Container -->
+                            <div class="space-y-3">
+                                <label class="block text-xs font-medium text-gray-400">Estacionamientos</label>
+                                <div id="estacionamientosContainer" class="space-y-2">
+                                    <div class="parking-row flex gap-2 items-center">
+                                        <input type="text" name="estacionamiento_num" placeholder="N° Estac. (ej. 195)"
+                                            class="input-field flex-1" />
+                                        <button type="button"
+                                            class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors opacity-0 pointer-events-none">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="button" id="btnAddParking"
+                                    class="text-xs font-medium text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Agregar otro estacionamiento
+                                </button>
                             </div>
                         </div>
-                    </fieldset>
+            </div>
+            </div>
+            </fieldset>
 
-                    <!-- Condiciones del Arriendo -->
-                    <fieldset class="space-y-4">
-                        <legend
-                            class="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                            <span class="w-5 h-px bg-amber-500/50"></span> Condiciones del Arriendo
-                        </legend>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Fecha del contrato</label>
-                                <input type="text" name="fecha_contrato" required
-                                    placeholder="Ej. 01 Septiembre de 2025" class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Plazo (meses)</label>
-                                <input type="number" name="plazo_meses" required placeholder="Ej. 12" min="1"
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Renta mensual (UF)</label>
-                                <input type="text" name="monto_renta_uf" required placeholder="Ej. 28"
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Multa por atraso
-                                    (%)</label>
-                                <input type="text" name="porcentaje_multa_atraso" placeholder="Ej. 5" value="5"
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Días de aviso para
-                                    término</label>
-                                <input type="number" name="dias_aviso" placeholder="Ej. 60" value="60" min="1"
-                                    class="input-field" />
-                            </div>
-                        </div>
-                    </fieldset>
+            <!-- Condiciones del Arriendo -->
+            <fieldset class="space-y-4">
+                <legend class="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                    <span class="w-5 h-px bg-amber-500/50"></span> Condiciones del Arriendo
+                </legend>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Fecha del contrato</label>
+                        <input type="text" name="fecha_contrato" required placeholder="Ej. 01 Septiembre de 2025"
+                            class="input-field" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Plazo (meses)</label>
+                        <input type="number" name="plazo_meses" required placeholder="Ej. 12" min="1"
+                            class="input-field" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Renta mensual (UF)</label>
+                        <input type="text" name="monto_renta_uf" required placeholder="Ej. 28" class="input-field" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Multa por atraso
+                            (%)</label>
+                        <input type="text" name="porcentaje_multa_atraso" placeholder="Ej. 5" value="5"
+                            class="input-field" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Días de aviso para
+                            término</label>
+                        <input type="number" name="dias_aviso" placeholder="Ej. 60" value="60" min="1"
+                            class="input-field" />
+                    </div>
+                </div>
+            </fieldset>
 
-                    <!-- Contacto del Arrendatario -->
-                    <fieldset class="space-y-4">
-                        <legend
-                            class="text-xs font-semibold text-brand-400 uppercase tracking-wider flex items-center gap-2">
-                            <span class="w-5 h-px bg-brand-500/50"></span> Contacto del Arrendatario
-                        </legend>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Teléfono</label>
-                                <input type="tel" name="arrendatario_telefono" placeholder="Ej. +56 9 1234 5678"
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Correo electrónico</label>
-                                <input type="email" name="arrendatario_email" placeholder="Ej. contacto@empresa.cl"
-                                    class="input-field" />
-                            </div>
-                        </div>
-                    </fieldset>
+            <!-- Contacto del Arrendatario -->
+            <fieldset class="space-y-4">
+                <legend class="text-xs font-semibold text-brand-400 uppercase tracking-wider flex items-center gap-2">
+                    <span class="w-5 h-px bg-brand-500/50"></span> Contacto del Arrendatario
+                </legend>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Teléfono</label>
+                        <input type="tel" name="arrendatario_telefono" placeholder="Ej. +56 9 1234 5678"
+                            class="input-field" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Correo electrónico</label>
+                        <input type="email" name="arrendatario_email" placeholder="Ej. contacto@empresa.cl"
+                            class="input-field" />
+                    </div>
+                </div>
+            </fieldset>
 
-                    <!-- Submit -->
-                    <button type="submit" id="btnGenerar"
-                        class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-violet-600 hover:from-brand-500 hover:to-violet-500 text-white font-semibold rounded-xl transition-all hover:shadow-xl hover:shadow-brand-500/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Generar Contrato
-                    </button>
-                </form>
+            <!-- Submit -->
+            <button type="submit" id="btnGenerar"
+                class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-violet-600 hover:from-brand-500 hover:to-violet-500 text-white font-semibold rounded-xl transition-all hover:shadow-xl hover:shadow-brand-500/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Generar Contrato
+            </button>
+            </form>
             </div>
 
             <!-- ═══ BATCH MODE PANEL ═══ -->

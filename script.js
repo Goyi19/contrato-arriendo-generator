@@ -37,6 +37,11 @@ const DOM = {
     downloadButtons: $('#downloadButtons'),
     errorSection: $('#errorSection'),
     errorText: $('#errorText'),
+    // Dynamic fields
+    oficinasContainer: $('#oficinasContainer'),
+    btnAddOffice: $('#btnAddOffice'),
+    estacionamientosContainer: $('#estacionamientosContainer'),
+    btnAddParking: $('#btnAddParking'),
 };
 
 // ──────────────────────────────────────────────
@@ -236,15 +241,120 @@ function setLoadingState(button, loading) {
 }
 
 // ──────────────────────────────────────────────
-// MANUAL MODE: Collect form data
+// CONTRACT LOGIC: Deterministic String Building
 // ──────────────────────────────────────────────
-function getFormData() {
-    const formData = new FormData(DOM.manualForm);
-    const data = {};
-    for (const [key, value] of formData.entries()) {
-        data[key] = value;
+function buildContractData(rawData) {
+    // Collect offices and surfaces
+    let oficinas = [];
+    let superficies = [];
+    let estacs = [];
+
+    if (rawData.oficina_num) {
+        // From dynamic manual form
+        oficinas = Array.isArray(rawData.oficina_num) ? rawData.oficina_num : [rawData.oficina_num];
+        superficies = Array.isArray(rawData.oficina_m2) ? rawData.oficina_m2 : [rawData.oficina_m2];
+        estacs = Array.isArray(rawData.estacionamiento_num) ? rawData.estacionamiento_num : [rawData.estacionamiento_num];
+    } else {
+        // From bread/batch mode (CSV usually has strings)
+        const ofisStr = String(rawData.oficinas || '');
+        const supStr = String(rawData.superficie || '');
+        const estStr = String(rawData.estacionamientos || '');
+
+        oficinas = ofisStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
+        superficies = supStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
+        estacs = estStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
     }
-    return data;
+
+    const validOfis = oficinas.filter(o => o && o.trim() !== "");
+    const validSup = superficies.filter(s => s && s.trim() !== "");
+    const validEstacs = estacs.filter(e => e && e.trim() !== "");
+
+    const piso = rawData.piso || 'octavo piso';
+
+    // Formatting Offices text 1
+    let ofisSubStr = "";
+    if (validOfis.length === 1) {
+        ofisSubStr = `la oficina número ${validOfis[0]} ubicada en el ${piso}`;
+    } else if (validOfis.length > 1) {
+        const last = validOfis[validOfis.length - 1];
+        const rest = validOfis.slice(0, -1).join(', ');
+        const pluralWord = validOfis.length === 2 ? 'ambas oficinas' : 'todas estas oficinas';
+        ofisSubStr = `las oficinas número ${rest} y ${last} ubicadas en el ${piso}, ${pluralWord}`;
+    }
+
+    // Formatting Parkings text
+    let estacsSubStr = "";
+    if (validEstacs.length === 0) {
+        estacsSubStr = "sin estacionamientos";
+    } else if (validEstacs.length === 1) {
+        estacsSubStr = `el estacionamiento ${validEstacs[0]} del cuarto subterráneo`;
+    } else {
+        const last = validEstacs[validEstacs.length - 1];
+        const rest = validEstacs.slice(0, -1).join(', ');
+        estacsSubStr = `los estacionamientos ${rest} y ${last} del cuarto subterráneo`;
+    }
+
+    const full_oficinas_texto = `${ofisSubStr}, conjuntamente ${estacsSubStr}`;
+
+    // Formatting Offices text 2 (Clause Second)
+    let ofisSubStr2 = "";
+    if (validOfis.length === 1) {
+        ofisSubStr2 = `la oficina número ${validOfis[0]} del ${piso}`;
+    } else {
+        const last = validOfis[validOfis.length - 1];
+        const rest = validOfis.slice(0, -1).join(', ');
+        ofisSubStr2 = `la oficina número ${rest}, ${last} del ${piso}`;
+    }
+
+    let full_oficinas_texto_2 = ofisSubStr2;
+    if (validEstacs.length === 1) {
+        full_oficinas_texto_2 += ` y estacionamiento ${validEstacs[0]} del cuarto subterráneo`;
+    } else if (validEstacs.length > 1) {
+        const last = validEstacs[validEstacs.length - 1];
+        const rest = validEstacs.slice(0, -1).join(' y ');
+        full_oficinas_texto_2 += ` y estacionamiento ${rest} y ${last} del cuarto subterráneo`;
+    }
+
+    // Superficie
+    let superficie_texto = "";
+    if (validSup.length === 1) {
+        superficie_texto = `${validSup[0]} metros cuadrados`;
+    } else if (validSup.length > 1) {
+        const last = validSup[validSup.length - 1];
+        const rest = validSup.slice(0, -1).join(' y ');
+        superficie_texto = `${rest} y ${last} metros cuadrados respectivamente`;
+    }
+
+    // Representante
+    const rep_nombre = rawData.representante_nombre || '';
+    const rep_rut = rawData.representante_rut || '';
+    const arrendatario_representante_texto = rep_nombre ? `, representada por don ${rep_nombre}, cédula nacional de identidad número ${rep_rut}` : "";
+
+    // Signature Logic
+    const rawFirmaNombre = rep_nombre || rawData.arrendatario_nombre || '';
+    const rawFirmaRut = rep_rut || rawData.arrendatario_rut || '';
+
+    // Result object
+    return {
+        fecha_contrato: rawData.fecha_contrato || '01 de Enero de 2024',
+        arrendatario_nombre: rawData.arrendatario_nombre || '',
+        arrendatario_rut: rawData.arrendatario_rut || '',
+        arrendatario_representante_texto,
+        representante_nombre: rep_nombre,
+        representante_rut: rep_rut,
+        arrendatario_domicilio: rawData.arrendatario_domicilio || '',
+        oficinas_texto: full_oficinas_texto,
+        oficinas_texto_2: full_oficinas_texto_2,
+        superficie_texto: superficie_texto,
+        plazo_meses: rawData.plazo_meses || '12',
+        dias_aviso: rawData.dias_aviso || '60',
+        monto_renta_uf: rawData.monto_renta_uf || '0',
+        porcentaje_multa_atraso: rawData.porcentaje_multa_atraso || '5',
+        // Signature fields
+        firma_nombre: rawFirmaNombre,
+        firma_rut: rawFirmaRut,
+        firma_empresa: rep_nombre ? `pp. ${rawData.arrendatario_nombre}` : ''
+    };
 }
 
 // ──────────────────────────────────────────────
@@ -255,53 +365,48 @@ async function handleManualGenerate(e) {
     hideResults();
     hideError();
 
-    const data = getFormData();
-    const prompt = getPromptForGemini(data);
-
     setLoadingState(DOM.btnGenerar, true);
-    showProgress('Enviando datos a Google Gemini...', 20, 'La IA está redactando tu contrato con gramática perfecta.');
+    showProgress('Preparando documento...', 20, 'Construyendo textos legales.');
 
     try {
-        showProgress('La IA está procesando tu contrato...', 50, 'Ajustando gramática, singulares, plurales y artículos...');
-        let jsonStr = await callGeminiAPI(prompt);
-        jsonStr = jsonStr.replace(/```json/i, '').replace(/```/g, '').trim();
-        let templateData;
-        try {
-            templateData = JSON.parse(jsonStr);
-        } catch (e) {
-            console.error(e, jsonStr);
-            throw new Error('Gemini no devolvió un JSON válido. Intenta nuevamente.');
+        const formData = new FormData(DOM.manualForm);
+        const rawData = {};
+        for (const [key, value] of formData.entries()) {
+            if (!rawData[key]) {
+                rawData[key] = value;
+            } else {
+                if (!Array.isArray(rawData[key])) rawData[key] = [rawData[key]];
+                rawData[key].push(value);
+            }
         }
 
-        showProgress('Generando archivo .docx...', 85, 'Creando documento idéntico a la plantilla original...');
+        const templateData = buildContractData(rawData);
+
+        showProgress('Generando archivo .docx...', 70, 'Preservando formato original de la plantilla.');
+
         let blob;
         try {
             blob = await generateDocx(templateData, 'contrato');
         } catch (docxErr) {
-            console.error('Error en Docxtemplater:', docxErr);
-            if (docxErr.properties && docxErr.properties.errors) {
-                const multiError = docxErr.properties.errors.map(e => e.message).join(', ');
-                throw new Error(`Error en la plantilla: ${multiError}`);
-            }
-            throw docxErr;
+            console.error('Error docxtemplater:', docxErr);
+            throw new Error(`Error al generar el documento: ${docxErr.message}`);
         }
 
         showProgress('¡Listo!', 100, '');
 
-        const safeName = (data.arrendatario_nombre || 'contrato').replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, '').replace(/\s+/g, '_');
+        const safeName = (templateData.arrendatario_nombre || 'contrato').replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, '').replace(/\s+/g, '_');
         const downloadFileName = `Contrato_Arriendo_${safeName}.docx`;
 
-        showResult(`Contrato generado para ${data.arrendatario_nombre}`, [{
+        showResult(`Contrato generado exitosamente`, [{
             label: `Descargar ${downloadFileName}`,
             onClick: () => saveAs(blob, downloadFileName)
         }]);
 
-        hideProgress();
     } catch (error) {
-        hideProgress();
         showError(error.message);
     } finally {
         setLoadingState(DOM.btnGenerar, false);
+        hideProgress();
     }
 }
 
@@ -389,11 +494,7 @@ async function handleBatchGenerate() {
             );
 
             try {
-                const prompt = getPromptForGemini(row);
-                let jsonStr = await callGeminiAPI(prompt);
-                jsonStr = jsonStr.replace(/```json/i, '').replace(/```/g, '').trim();
-                let templateData = JSON.parse(jsonStr);
-
+                const templateData = buildContractData(row);
                 const blob = await generateDocx(templateData, name);
 
                 const safeName = name.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, '').replace(/\s+/g, '_');
@@ -402,13 +503,12 @@ async function handleBatchGenerate() {
             } catch (err) {
                 console.error(`Error en fila ${rowNum}:`, err);
                 failed++;
-                // Add error log to zip
                 zip.file(`ERROR_Fila_${rowNum}.txt`, `Error generando contrato para ${name}:\n${err.message}`);
             }
 
-            // Rate limiting: wait 1.5 seconds between API calls to avoid 429
+            // No longer need a large timeout since we are not calling Gemini API
             if (i < total - 1) {
-                await new Promise(r => setTimeout(r, 1500));
+                await new Promise(r => setTimeout(r, 100));
             }
         }
 
@@ -480,6 +580,49 @@ function initApiKeyToggle() {
 }
 
 // ──────────────────────────────────────────────
+// DYNAMIC ROWS
+// ──────────────────────────────────────────────
+function initDynamicRows() {
+    // Offices
+    DOM.btnAddOffice.addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = 'flex gap-2 items-center';
+        div.innerHTML = `
+            <input type="text" name="oficina_num" required placeholder="Oficina (ej. 802)" class="input-field flex-1" />
+            <input type="text" name="oficina_m2" required placeholder="M2 (ej. 20,81)" class="input-field w-32" />
+            <button type="button" class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        `;
+        DOM.oficinasContainer.appendChild(div);
+    });
+
+    // Parkings
+    DOM.btnAddParking.addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = 'flex gap-2 items-center';
+        div.innerHTML = `
+            <input type="text" name="estacionamiento_num" placeholder="N° Estac. (ej. 196)" class="input-field flex-1" />
+            <button type="button" class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        `;
+        DOM.estacionamientosContainer.appendChild(div);
+    });
+
+    // Global listener for removals
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.remove-row')) {
+            e.target.closest('.flex').remove();
+        }
+        if (e.target.closest('.remove-office') || e.target.closest('.remove-parking')) {
+            // Original static rows remove logic if needed
+            e.target.closest('.flex').remove();
+        }
+    });
+}
+
+// ──────────────────────────────────────────────
 // INITIALIZATION
 // ──────────────────────────────────────────────
 function init() {
@@ -507,6 +650,9 @@ function init() {
     // Batch mode
     initDragAndDrop();
     DOM.btnGenerarLote.addEventListener('click', handleBatchGenerate);
+
+    // Dynamic rows
+    initDynamicRows();
 
     // Contract type change (show alert for disabled types)
     DOM.contractType.addEventListener('change', (e) => {
