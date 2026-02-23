@@ -265,9 +265,16 @@ function buildContractData(rawData) {
         estacs = estStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
     }
 
-    const validOfis = Array.from(new Set(oficinas.filter(o => o && o.trim() !== "")));
-    const validSup = Array.from(new Set(superficies.filter(s => s && s.trim() !== "")));
-    const validEstacs = Array.from(new Set(estacs.filter(e => e && e.trim() !== "")));
+    // Filter and trim first
+    const trimmedOfis = oficinas.map(o => String(o).trim()).filter(Boolean);
+    const trimmedSup = superficies.map(s => String(s).trim()).filter(Boolean);
+    const trimmedEstacs = estacs.map(e => String(e).trim()).filter(Boolean);
+
+    // Deduplicate using Set while preserving order
+    const validOfis = Array.from(new Set(trimmedOfis));
+    const validSup = Array.from(new Set(trimmedSup));
+    const validEstacs = Array.from(new Set(trimmedEstacs));
+
 
 
 
