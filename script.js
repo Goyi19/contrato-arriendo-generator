@@ -103,7 +103,7 @@ async function callGeminiAPI(prompt) {
         throw new Error('No has configurado tu API Key de Google Gemini. Pégala en el campo de arriba y presiona "Guardar Key".');
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
         method: 'POST',
