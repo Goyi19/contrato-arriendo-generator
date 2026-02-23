@@ -266,102 +266,31 @@ function buildContractData(rawData) {
     }
 
     // Filter and trim first
-    const trimmedOfis = oficinas.map(o => String(o).trim()).filter(Boolean);
-    const trimmedSup = superficies.map(s => String(s).trim()).filter(Boolean);
-    const trimmedEstacs = estacs.map(e => String(e).trim()).filter(Boolean);
-
     // Deduplicate using Set while preserving order
-    const validOfis = Array.from(new Set(trimmedOfis));
-    const validSup = Array.from(new Set(trimmedSup));
-    const validEstacs = Array.from(new Set(trimmedEstacs));
+    const validOfis = Array.from(new Set(oficinas.map(o => String(o).trim()).filter(Boolean)));
+    const validSup = Array.from(new Set(superficies.map(s => String(s).trim()).filter(Boolean)));
+    const validEstacs = Array.from(new Set(estacs.map(e => String(e).trim()).filter(Boolean)));
 
-
-
-
-    const piso = rawData.piso || 'octavo piso';
-
-    // Formatting Offices text 1
-    let ofisSubStr = "";
-    if (validOfis.length === 1) {
-        ofisSubStr = `la oficina número ${validOfis[0]} ubicada en el ${piso}`;
-    } else if (validOfis.length > 1) {
-        const last = validOfis[validOfis.length - 1];
-        const rest = validOfis.slice(0, -1).join(', ');
-        const pluralWord = validOfis.length === 2 ? 'ambas oficinas' : 'todas estas oficinas';
-        ofisSubStr = `las oficinas número ${rest} y ${last} ubicadas en el ${piso}, ${pluralWord}`;
-    }
-
+    const piso = rawData.piso || '';
     const ubiEstac = rawData.ubi_estacionamiento || 'cuarto subterráneo';
 
-    // Formatting Parkings text
-    let estacsSubStr = "";
-    if (validEstacs.length === 0) {
-        estacsSubStr = "sin estacionamientos";
-    } else if (validEstacs.length === 1) {
-        estacsSubStr = `el estacionamiento ${validEstacs[0]} del ${ubiEstac}`;
-    } else {
-        const last = validEstacs[validEstacs.length - 1];
-        const rest = validEstacs.slice(0, -1).join(', ');
-        estacsSubStr = `los estacionamientos ${rest} y ${last} del ${ubiEstac}`;
-    }
+    // List formatters
+    const formatList = (arr) => {
+        if (arr.length === 0) return "";
+        if (arr.length === 1) return arr[0];
+        const last = arr[arr.length - 1];
+        const rest = arr.slice(0, -1).join(', ');
+        return `${rest} y ${last}`;
+    };
 
-    const full_oficinas_texto = `${ofisSubStr}, conjuntamente ${estacsSubStr}`;
-
-    // Formatting Offices text 2 (Clause Second)
-    let ofisSubStr2 = "";
-    if (validOfis.length === 1) {
-        ofisSubStr2 = `la oficina número ${validOfis[0]} del ${piso}`;
-    } else {
-        const last = validOfis[validOfis.length - 1];
-        const rest = validOfis.slice(0, -1).join(', ');
-        ofisSubStr2 = `la oficina número ${rest}, ${last} del ${piso}`;
-    }
-
-    let full_oficinas_texto_2 = ofisSubStr2;
-    if (validEstacs.length === 1) {
-        full_oficinas_texto_2 += ` y el estacionamiento ${validEstacs[0]} del ${ubiEstac}`;
-    } else if (validEstacs.length > 1) {
-        const last = validEstacs[validEstacs.length - 1];
-        const rest = validEstacs.slice(0, -1).join(' y ');
-        full_oficinas_texto_2 += ` y los estacionamientos ${rest} y ${last} del ${ubiEstac}`;
-    }
-
-    // Formatting Offices text 3 (Surface description)
-    // "La oficina Nº803 y 802 tienen una superficie aproximada de 32,00 y 20,81 metros cuadrados"
-    let ofisSubStr3 = "";
-    if (validOfis.length === 1) {
-        ofisSubStr3 = `La oficina N°${validOfis[0]} tiene una superficie aproximada de ${validSup[0] || '0'} metros cuadrados`;
-    } else {
-        const last = validOfis[validOfis.length - 1];
-        const rest = validOfis.slice(0, -1).join(' y ');
-        const lastSup = validSup[validSup.length - 1] || '0';
-        const restSup = validSup.slice(0, -1).join(' y ');
-        ofisSubStr3 = `Las oficinas N°${rest} y ${last} tienen una superficie aproximada de ${restSup} y ${lastSup} metros cuadrados`;
-    }
-    const full_oficinas_texto_3 = ofisSubStr3;
-
-
-    // Formatting Offices text 4 (D-prefix)
-    // "D803 y D802"
-    let full_oficinas_texto_4 = "";
-    if (validOfis.length === 1) {
-        full_oficinas_texto_4 = `D${validOfis[0]}`;
-    } else {
-        const last = validOfis[validOfis.length - 1];
-        const rest = validOfis.slice(0, -1).join(' y D');
-        full_oficinas_texto_4 = `D${rest} y D${last}`;
-    }
-
-
-    // Superficie
-    let superficie_texto = "";
-    if (validSup.length === 1) {
-        superficie_texto = `${validSup[0]}`;
-    } else if (validSup.length > 1) {
-        const last = validSup[validSup.length - 1];
-        const rest = validSup.slice(0, -1).join(' y ');
-        superficie_texto = `${rest} y ${last}`;
-    }
+    // Special formatter for D-prefix: "403 y D409"
+    const formatListD = (arr) => {
+        if (arr.length === 0) return "";
+        if (arr.length === 1) return arr[0];
+        const last = arr[arr.length - 1];
+        const rest = arr.slice(0, -1).join(' y D');
+        return `D${rest} y D${last}`;
+    };
 
     // Representante
     const rep_nombre = rawData.representante_nombre || '';
@@ -374,30 +303,40 @@ function buildContractData(rawData) {
 
     // Result object
     return {
-        fecha_contrato: rawData.fecha_contrato || '01 de Enero de 2024',
+        // Sections & Grammar
+        multiple_ofis: validOfis.length > 1,
+        oficinas_lista: formatList(validOfis),
+        oficina_unica: validOfis[0] || '',
+        parentesis_plural: validOfis.length === 2 ? 'ambas oficinas' : 'todas estas oficinas',
+
+        tiene_estac: validEstacs.length > 0,
+        multiple_estac: validEstacs.length > 1,
+        estacs_lista: formatList(validEstacs),
+        estac_unico: validEstacs[0] || '',
+        ubi_estac: ubiEstac,
+
+        sup_lista: formatList(validSup),
+        sup_unica: validSup[0] || '',
+        oficinas_lista_d: formatListD(validOfis),
+
+        // Basic Info
+        fecha_contrato: rawData.fecha_contrato || '',
         arrendatario_nombre: rawData.arrendatario_nombre || '',
         arrendatario_rut: rawData.arrendatario_rut || '',
         arrendatario_representante_texto,
         representante_nombre: rep_nombre,
         representante_rut: rep_rut,
         arrendatario_domicilio: rawData.arrendatario_domicilio || '',
-        oficinas_texto: full_oficinas_texto,
-        oficinas_texto_2: full_oficinas_texto_2,
-        oficinas_texto_3: full_oficinas_texto_3,
-        oficinas_texto_4: full_oficinas_texto_4,
-        superficie_texto: superficie_texto,
-
+        piso: piso,
 
         plazo_meses: rawData.plazo_meses || '',
         dias_aviso: rawData.dias_aviso || '',
         monto_renta_uf: rawData.monto_renta_uf || '',
         porcentaje_multa_atraso: rawData.porcentaje_multa_atraso || '',
-        // Extra fields from yellow highlights
-        arrendatario_telefono: Array.isArray(rawData.arrendatario_telefono) ? rawData.arrendatario_telefono.find(v => v) || '' : rawData.arrendatario_telefono || '',
-        arrendatario_email: Array.isArray(rawData.arrendatario_email) ? rawData.arrendatario_email.find(v => v) || '' : rawData.arrendatario_email || '',
-        oficinas_simples: validOfis.join(' y '),
-        oficinas_simples_2: validOfis.length > 1 ? validOfis.slice(1).join(' y ') : '',
-        estacionamientos_simples: validEstacs.join(' y '),
+
+        arrendatario_telefono: Array.isArray(rawData.arrendatario_telefono) ? Array.from(new Set(rawData.arrendatario_telefono.map(v => String(v).trim()).filter(Boolean)))[0] || '' : String(rawData.arrendatario_telefono || '').trim(),
+        arrendatario_email: Array.isArray(rawData.arrendatario_email) ? Array.from(new Set(rawData.arrendatario_email.map(v => String(v).trim()).filter(Boolean)))[0] || '' : String(rawData.arrendatario_email || '').trim(),
+
         // Signature fields
         firma_nombre: rawFirmaNombre,
         firma_rut: rawFirmaRut,
