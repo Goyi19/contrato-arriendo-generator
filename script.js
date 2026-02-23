@@ -265,9 +265,10 @@ function buildContractData(rawData) {
         estacs = estStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
     }
 
-    const validOfis = [...new Set(oficinas.filter(o => o && o.trim() !== ""))];
-    const validSup = [...new Set(superficies.filter(s => s && s.trim() !== ""))];
-    const validEstacs = [...new Set(estacs.filter(e => e && e.trim() !== ""))];
+    const validOfis = Array.from(new Set(oficinas.filter(o => o && o.trim() !== "")));
+    const validSup = Array.from(new Set(superficies.filter(s => s && s.trim() !== "")));
+    const validEstacs = Array.from(new Set(estacs.filter(e => e && e.trim() !== "")));
+
 
 
     const piso = rawData.piso || 'octavo piso';
@@ -283,16 +284,18 @@ function buildContractData(rawData) {
         ofisSubStr = `las oficinas número ${rest} y ${last} ubicadas en el ${piso}, ${pluralWord}`;
     }
 
+    const ubiEstac = rawData.ubi_estacionamiento || 'cuarto subterráneo';
+
     // Formatting Parkings text
     let estacsSubStr = "";
     if (validEstacs.length === 0) {
         estacsSubStr = "sin estacionamientos";
     } else if (validEstacs.length === 1) {
-        estacsSubStr = `el estacionamiento ${validEstacs[0]} del cuarto subterráneo`;
+        estacsSubStr = `el estacionamiento ${validEstacs[0]} del ${ubiEstac}`;
     } else {
         const last = validEstacs[validEstacs.length - 1];
         const rest = validEstacs.slice(0, -1).join(', ');
-        estacsSubStr = `los estacionamientos ${rest} y ${last} del cuarto subterráneo`;
+        estacsSubStr = `los estacionamientos ${rest} y ${last} del ${ubiEstac}`;
     }
 
     const full_oficinas_texto = `${ofisSubStr}, conjuntamente ${estacsSubStr}`;
@@ -309,11 +312,11 @@ function buildContractData(rawData) {
 
     let full_oficinas_texto_2 = ofisSubStr2;
     if (validEstacs.length === 1) {
-        full_oficinas_texto_2 += ` y el estacionamiento ${validEstacs[0]} del cuarto subterráneo`;
+        full_oficinas_texto_2 += ` y el estacionamiento ${validEstacs[0]} del ${ubiEstac}`;
     } else if (validEstacs.length > 1) {
         const last = validEstacs[validEstacs.length - 1];
         const rest = validEstacs.slice(0, -1).join(' y ');
-        full_oficinas_texto_2 += ` y los estacionamientos ${rest} y ${last} del cuarto subterráneo`;
+        full_oficinas_texto_2 += ` y los estacionamientos ${rest} y ${last} del ${ubiEstac}`;
     }
 
     // Formatting Offices text 3 (Surface description)
@@ -326,9 +329,10 @@ function buildContractData(rawData) {
         const rest = validOfis.slice(0, -1).join(' y ');
         const lastSup = validSup[validSup.length - 1] || '0';
         const restSup = validSup.slice(0, -1).join(' y ');
-        ofisSubStr3 = `Las oficinas N°${rest} y ${last} tienen una superficie aproximada de ${restSup} y ${lastSup} metros cuadrados respectivamente`;
+        ofisSubStr3 = `Las oficinas N°${rest} y ${last} tienen una superficie aproximada de ${restSup} y ${lastSup} metros cuadrados`;
     }
     const full_oficinas_texto_3 = ofisSubStr3;
+
 
     // Formatting Offices text 4 (D-prefix)
     // "D803 y D802"
@@ -345,11 +349,11 @@ function buildContractData(rawData) {
     // Superficie
     let superficie_texto = "";
     if (validSup.length === 1) {
-        superficie_texto = `${validSup[0]} metros cuadrados`;
+        superficie_texto = `${validSup[0]}`;
     } else if (validSup.length > 1) {
         const last = validSup[validSup.length - 1];
         const rest = validSup.slice(0, -1).join(' y ');
-        superficie_texto = `${rest} y ${last} metros cuadrados respectivamente`;
+        superficie_texto = `${rest} y ${last}`;
     }
 
     // Representante

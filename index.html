@@ -234,11 +234,21 @@
                             <span class="w-5 h-px bg-violet-500/50"></span> Propiedad — Edificio Business Center
                         </legend>
                         <div class="space-y-4">
-                            <!-- Piso -->
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Piso (en texto)</label>
-                                <input type="text" name="piso" required placeholder="Ej. octvavo piso"
-                                    class="input-field" />
+                            <!-- Pisos -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Piso Oficinas (ej.
+                                        octavo piso)</label>
+                                    <input type="text" name="piso" required placeholder="Ej. octavo piso"
+                                        class="input-field" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Ubicación
+                                        Estacionamientos (ej. cuarto subterráneo)</label>
+                                    <input type="text" name="ubi_estacionamiento" required
+                                        placeholder="Ej. cuarto subterráneo" class="input-field"
+                                        value="cuarto subterráneo" />
+                                </div>
                             </div>
 
                             <!-- Oficinas Container -->
