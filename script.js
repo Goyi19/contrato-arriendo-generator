@@ -265,9 +265,10 @@ function buildContractData(rawData) {
         estacs = estStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
     }
 
-    const validOfis = oficinas.filter(o => o && o.trim() !== "");
-    const validSup = superficies.filter(s => s && s.trim() !== "");
-    const validEstacs = estacs.filter(e => e && e.trim() !== "");
+    const validOfis = [...new Set(oficinas.filter(o => o && o.trim() !== ""))];
+    const validSup = [...new Set(superficies.filter(s => s && s.trim() !== ""))];
+    const validEstacs = [...new Set(estacs.filter(e => e && e.trim() !== ""))];
+
 
     const piso = rawData.piso || 'octavo piso';
 
@@ -376,12 +377,13 @@ function buildContractData(rawData) {
         superficie_texto: superficie_texto,
 
 
-        plazo_meses: rawData.plazo_meses || '12',
-        dias_aviso: rawData.dias_aviso || '60',
-        monto_renta_uf: rawData.monto_renta_uf || '0',
+        plazo_meses: rawData.plazo_meses || '',
+        dias_aviso: rawData.dias_aviso || '',
+        monto_renta_uf: rawData.monto_renta_uf || '',
+        porcentaje_multa_atraso: rawData.porcentaje_multa_atraso || '',
         // Extra fields from yellow highlights
-        arrendatario_telefono: rawData.arrendatario_telefono || '',
-        arrendatario_email: rawData.arrendatario_email || '',
+        arrendatario_telefono: Array.isArray(rawData.arrendatario_telefono) ? rawData.arrendatario_telefono.find(v => v) || '' : rawData.arrendatario_telefono || '',
+        arrendatario_email: Array.isArray(rawData.arrendatario_email) ? rawData.arrendatario_email.find(v => v) || '' : rawData.arrendatario_email || '',
         oficinas_simples: validOfis.join(' y '),
         oficinas_simples_2: validOfis.length > 1 ? validOfis.slice(1).join(' y ') : '',
         estacionamientos_simples: validEstacs.join(' y '),
