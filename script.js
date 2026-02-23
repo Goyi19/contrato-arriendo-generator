@@ -145,99 +145,88 @@ async function callGeminiAPI(prompt) {
 // GENERATE .DOCX FILE
 // ──────────────────────────────────────────────
 async function generateDocx(contractText, fileName) {
-    const { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel } = docx;
+    const { Document, Packer, Paragraph, TextRun, AlignmentType } = docx;
 
-    // Split text into lines and create paragraphs
     const lines = contractText.split('\n');
     const paragraphs = [];
 
-    for (const line of lines) {
+    let isHeaderRegion = true;
+    let isSignatureRegion = false;
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
         const trimmed = line.trim();
 
         if (!trimmed) {
-            paragraphs.push(new Paragraph({ spacing: { after: 120 } }));
-            continue;
-        }
-
-        // Title detection
-        if (trimmed === 'CONTRATO DE ARRIENDO' || trimmed === 'CONTRATO DE ARRENDAMIENTO') {
+            // Keep empty lines as spacing
             paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: trimmed, bold: true, size: 32, font: 'Times New Roman' })],
-                alignment: AlignmentType.CENTER,
-                spacing: { after: 200 },
+                children: [new TextRun({ text: "", size: 24, font: 'Times New Roman' })],
+                spacing: { before: 0, after: 120 }
             }));
             continue;
         }
 
-        // Centered subtitle lines (company names, "Y" separator)
-        if (trimmed === 'Y' || trimmed.startsWith('INVERSIONES') || trimmed.match(/^[A-ZÁÉÍÓÚÑ\s,.]+SpA$/)) {
+        // Top Header section
+        if (isHeaderRegion) {
+            if (trimmed.startsWith('En Santiago de Chile') || trimmed.length > 80) {
+                isHeaderRegion = false;
+            } else {
+                paragraphs.push(new Paragraph({
+                    children: [new TextRun({ text: trimmed, bold: true, size: 24, font: 'Times New Roman' })],
+                    alignment: AlignmentType.CENTER,
+                    spacing: { after: 100 },
+                }));
+                continue;
+            }
+        }
+
+        // Signature detection
+        if (trimmed.startsWith('___________________')) {
+            isSignatureRegion = true;
+        }
+
+        if (isSignatureRegion) {
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: trimmed, bold: false, size: 24, font: 'Times New Roman' })],
+                alignment: AlignmentType.LEFT,
+                spacing: { after: 0 },
+            }));
+            continue;
+        }
+
+        // Clause headers
+        const clauseMatch = trimmed.match(/^(PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO|SEXTO|SÉPTIMO|OCTAVO|NOVENO|DÉCIMO(?:\s+(?:TERCERO|CUARTO|QUINTO|SEXTO|SÉPTIMO|OCTAVO|NOVENO))?|UNDÉCIMO|DUODÉCIMO|VIGÉSIMO(?:\s+(?:PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO))?|PERSONERÍAS)[.:]/i);
+        if (clauseMatch) {
             paragraphs.push(new Paragraph({
                 children: [new TextRun({ text: trimmed, bold: true, size: 24, font: 'Times New Roman' })],
-                alignment: AlignmentType.CENTER,
+                alignment: AlignmentType.JUSTIFIED,
+                spacing: { before: 300, after: 100 },
+            }));
+            continue;
+        }
+
+        // Closing ALL CAPS bold line
+        if (trimmed === trimmed.toUpperCase() && trimmed.length > 40 && !trimmed.startsWith('/')) {
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: trimmed, bold: true, size: 24, font: 'Times New Roman' })],
+                alignment: AlignmentType.JUSTIFIED,
+                spacing: { before: 240, after: 240 },
+            }));
+            continue;
+        }
+
+        // Subclauses (/Uno/, /A/, /i/...)
+        if (/^\/[A-Za-záéíóú]+\//.test(trimmed) || /^[a-z]\)/.test(trimmed)) {
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: trimmed, size: 24, font: 'Times New Roman' })],
+                alignment: AlignmentType.JUSTIFIED,
+                indent: { left: 720 },
                 spacing: { after: 100 },
             }));
             continue;
         }
 
-        // Clause headers (PRIMERO:, DÉCIMO TERCERO:, VIGÉSIMO QUINTO:, PERSONERÍAS., etc.)
-        const clauseMatch = trimmed.match(/^(PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO|SEXTO|SÉPTIMO|OCTAVO|NOVENO|DÉCIMO(\s+(TERCERO|CUARTO|QUINTO|SEXTO|SÉPTIMO|OCTAVO|NOVENO))?|UNDÉCIMO|DUODÉCIMO|VIGÉSIMO(\s+(PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO))?|PERSONERÍAS)[.:]/i);
-        if (clauseMatch) {
-            paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: trimmed, bold: true, size: 24, font: 'Times New Roman' })],
-                spacing: { before: 300, after: 150 },
-            }));
-            continue;
-        }
-
-        // ALL-CAPS closing statement (e.g. "EL PRESENTE CONTRATO DE ARRENDAMIENTO SE SUSCRIBE...")
-        if (trimmed === trimmed.toUpperCase() && trimmed.length > 30 && !trimmed.startsWith('_')) {
-            paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: trimmed, bold: true, size: 24, font: 'Times New Roman' })],
-                alignment: AlignmentType.JUSTIFIED,
-                spacing: { before: 300, after: 150 },
-            }));
-            continue;
-        }
-
-        // Signature lines (underscores)
-        if (trimmed.startsWith('_')) {
-            paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: trimmed, size: 24, font: 'Times New Roman' })],
-                spacing: { before: 400, after: 80 },
-            }));
-            continue;
-        }
-
-        // Signature labels (pp. lines)
-        if (trimmed.startsWith('pp.') || trimmed.startsWith('RUT:')) {
-            paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: trimmed, size: 24, font: 'Times New Roman' })],
-                spacing: { after: 80 },
-            }));
-            continue;
-        }
-
-        // Subclauses: /Uno/, /Dos/, /A/, /B/, /i/, /ii/, etc.
-        if (/^\/[A-Za-záéíóú]+\//.test(trimmed)) {
-            paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: trimmed, size: 24, font: 'Times New Roman' })],
-                indent: { left: 720 },
-                spacing: { after: 80 },
-            }));
-            continue;
-        }
-
-        // Traditional subclauses (a), b), etc.)
-        if (/^[a-z]\)/.test(trimmed)) {
-            paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: trimmed, size: 24, font: 'Times New Roman' })],
-                indent: { left: 720 },
-                spacing: { after: 80 },
-            }));
-            continue;
-        }
-
-        // Regular text
+        // Regular Text
         paragraphs.push(new Paragraph({
             children: [new TextRun({ text: trimmed, size: 24, font: 'Times New Roman' })],
             alignment: AlignmentType.JUSTIFIED,
@@ -249,7 +238,7 @@ async function generateDocx(contractText, fileName) {
         sections: [{
             properties: {
                 page: {
-                    margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
+                    margin: { top: 1417, right: 1417, bottom: 1417, left: 1417 }, // ~2.5 cm margins standard
                 }
             },
             children: paragraphs,
