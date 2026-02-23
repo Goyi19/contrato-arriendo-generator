@@ -153,10 +153,18 @@ async function generateDocx(templateData, fileName) {
     const arrayBuffer = await response.arrayBuffer();
 
     // 2. Cargar en PizZip
+    const PizZip = window.PizZip;
+    if (!PizZip) {
+        throw new Error('La librería PizZip no se cargó correctamente.');
+    }
     const zip = new PizZip(arrayBuffer);
 
     // 3. Crear instancia de docxtemplater
-    const doc = new window.docxtemplater(zip, {
+    const Docxtemplater = window.docxtemplater;
+    if (!Docxtemplater) {
+        throw new Error('La librería Docxtemplater no se cargó correctamente.');
+    }
+    const doc = new Docxtemplater(zip, {
         paragraphLoop: true,
         linebreaks: true,
     });
