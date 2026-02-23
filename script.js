@@ -144,108 +144,32 @@ async function callGeminiAPI(prompt) {
 // ──────────────────────────────────────────────
 // GENERATE .DOCX FILE
 // ──────────────────────────────────────────────
-async function generateDocx(contractText, fileName) {
-    const { Document, Packer, Paragraph, TextRun, AlignmentType } = docx;
-
-    const lines = contractText.split('\n');
-    const paragraphs = [];
-
-    let isHeaderRegion = true;
-    let isSignatureRegion = false;
-
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const trimmed = line.trim();
-
-        if (!trimmed) {
-            // Keep empty lines as spacing
-            paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: "", size: 24, font: 'Times New Roman' })],
-                spacing: { before: 0, after: 120 }
-            }));
-            continue;
-        }
-
-        // Top Header section
-        if (isHeaderRegion) {
-            if (trimmed.startsWith('En Santiago de Chile') || trimmed.length > 80) {
-                isHeaderRegion = false;
-            } else {
-                paragraphs.push(new Paragraph({
-                    children: [new TextRun({ text: trimmed, bold: true, size: 24, font: 'Times New Roman' })],
-                    alignment: AlignmentType.CENTER,
-                    spacing: { after: 100 },
-                }));
-                continue;
-            }
-        }
-
-        // Signature detection
-        if (trimmed.startsWith('___________________')) {
-            isSignatureRegion = true;
-        }
-
-        if (isSignatureRegion) {
-            paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: trimmed, bold: false, size: 24, font: 'Times New Roman' })],
-                alignment: AlignmentType.LEFT,
-                spacing: { after: 0 },
-            }));
-            continue;
-        }
-
-        // Clause headers
-        const clauseMatch = trimmed.match(/^(PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO|SEXTO|SÉPTIMO|OCTAVO|NOVENO|DÉCIMO(?:\s+(?:TERCERO|CUARTO|QUINTO|SEXTO|SÉPTIMO|OCTAVO|NOVENO))?|UNDÉCIMO|DUODÉCIMO|VIGÉSIMO(?:\s+(?:PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO))?|PERSONERÍAS)[.:]/i);
-        if (clauseMatch) {
-            paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: trimmed, bold: true, size: 24, font: 'Times New Roman' })],
-                alignment: AlignmentType.JUSTIFIED,
-                spacing: { before: 300, after: 100 },
-            }));
-            continue;
-        }
-
-        // Closing ALL CAPS bold line
-        if (trimmed === trimmed.toUpperCase() && trimmed.length > 40 && !trimmed.startsWith('/')) {
-            paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: trimmed, bold: true, size: 24, font: 'Times New Roman' })],
-                alignment: AlignmentType.JUSTIFIED,
-                spacing: { before: 240, after: 240 },
-            }));
-            continue;
-        }
-
-        // Subclauses (/Uno/, /A/, /i/...)
-        if (/^\/[A-Za-záéíóú]+\//.test(trimmed) || /^[a-z]\)/.test(trimmed)) {
-            paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: trimmed, size: 24, font: 'Times New Roman' })],
-                alignment: AlignmentType.JUSTIFIED,
-                indent: { left: 720 },
-                spacing: { after: 100 },
-            }));
-            continue;
-        }
-
-        // Regular Text
-        paragraphs.push(new Paragraph({
-            children: [new TextRun({ text: trimmed, size: 24, font: 'Times New Roman' })],
-            alignment: AlignmentType.JUSTIFIED,
-            spacing: { after: 100 },
-        }));
+async function generateDocx(templateData, fileName) {
+    // 1. Cargar la plantilla original
+    const response = await fetch('template.docx');
+    if (!response.ok) {
+        throw new Error('No se pudo cargar la plantilla base (template.docx).');
     }
+    const arrayBuffer = await response.arrayBuffer();
 
-    const doc = new Document({
-        sections: [{
-            properties: {
-                page: {
-                    margin: { top: 1417, right: 1417, bottom: 1417, left: 1417 }, // ~2.5 cm margins standard
-                }
-            },
-            children: paragraphs,
-        }],
+    // 2. Cargar en PizZip
+    const zip = new PizZip(arrayBuffer);
+
+    // 3. Crear instancia de docxtemplater
+    const doc = new window.docxtemplater(zip, {
+        paragraphLoop: true,
+        linebreaks: true,
     });
 
-    const blob = await Packer.toBlob(doc);
+    // 4. Renderizar con los datos adaptados por Gemini
+    doc.render(templateData);
+
+    // 5. Generar archivo Blob
+    const blob = doc.getZip().generate({
+        type: "blob",
+        mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    });
+
     return blob;
 }
 
@@ -331,10 +255,18 @@ async function handleManualGenerate(e) {
 
     try {
         showProgress('La IA está procesando tu contrato...', 50, 'Ajustando gramática, singulares, plurales y artículos...');
-        const contractText = await callGeminiAPI(prompt);
+        let jsonStr = await callGeminiAPI(prompt);
+        jsonStr = jsonStr.replace(/```json/i, '').replace(/```/g, '').trim();
+        let templateData;
+        try {
+            templateData = JSON.parse(jsonStr);
+        } catch (e) {
+            console.error(e, jsonStr);
+            throw new Error('Gemini no devolvió un JSON válido. Intenta nuevamente.');
+        }
 
-        showProgress('Generando archivo .docx...', 85, 'Creando documento Word con formato profesional...');
-        const blob = await generateDocx(contractText, 'contrato');
+        showProgress('Generando archivo .docx...', 85, 'Creando documento idéntico a la plantilla original...');
+        const blob = await generateDocx(templateData, 'contrato');
 
         showProgress('¡Listo!', 100, '');
 
@@ -440,8 +372,11 @@ async function handleBatchGenerate() {
 
             try {
                 const prompt = getPromptForGemini(row);
-                const contractText = await callGeminiAPI(prompt);
-                const blob = await generateDocx(contractText, name);
+                let jsonStr = await callGeminiAPI(prompt);
+                jsonStr = jsonStr.replace(/```json/i, '').replace(/```/g, '').trim();
+                let templateData = JSON.parse(jsonStr);
+
+                const blob = await generateDocx(templateData, name);
 
                 const safeName = name.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, '').replace(/\s+/g, '_');
                 zip.file(`Contrato_${safeName}.docx`, blob);
