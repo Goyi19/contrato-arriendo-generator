@@ -308,12 +308,38 @@ function buildContractData(rawData) {
 
     let full_oficinas_texto_2 = ofisSubStr2;
     if (validEstacs.length === 1) {
-        full_oficinas_texto_2 += ` y estacionamiento ${validEstacs[0]} del cuarto subterráneo`;
+        full_oficinas_texto_2 += ` y el estacionamiento ${validEstacs[0]} del cuarto subterráneo`;
     } else if (validEstacs.length > 1) {
         const last = validEstacs[validEstacs.length - 1];
         const rest = validEstacs.slice(0, -1).join(' y ');
-        full_oficinas_texto_2 += ` y estacionamiento ${rest} y ${last} del cuarto subterráneo`;
+        full_oficinas_texto_2 += ` y los estacionamientos ${rest} y ${last} del cuarto subterráneo`;
     }
+
+    // Formatting Offices text 3 (Surface description)
+    // "La oficina Nº803 y 802 tienen una superficie aproximada de 32,00 y 20,81 metros cuadrados"
+    let ofisSubStr3 = "";
+    if (validOfis.length === 1) {
+        ofisSubStr3 = `La oficina N°${validOfis[0]} tiene una superficie aproximada de ${validSup[0] || '0'} metros cuadrados`;
+    } else {
+        const last = validOfis[validOfis.length - 1];
+        const rest = validOfis.slice(0, -1).join(' y ');
+        const lastSup = validSup[validSup.length - 1] || '0';
+        const restSup = validSup.slice(0, -1).join(' y ');
+        ofisSubStr3 = `Las oficinas N°${rest} y ${last} tienen una superficie aproximada de ${restSup} y ${lastSup} metros cuadrados respectivamente`;
+    }
+    const full_oficinas_texto_3 = ofisSubStr3;
+
+    // Formatting Offices text 4 (D-prefix)
+    // "D803 y D802"
+    let full_oficinas_texto_4 = "";
+    if (validOfis.length === 1) {
+        full_oficinas_texto_4 = `D${validOfis[0]}`;
+    } else {
+        const last = validOfis[validOfis.length - 1];
+        const rest = validOfis.slice(0, -1).join(' y D');
+        full_oficinas_texto_4 = `D${rest} y D${last}`;
+    }
+
 
     // Superficie
     let superficie_texto = "";
@@ -345,11 +371,20 @@ function buildContractData(rawData) {
         arrendatario_domicilio: rawData.arrendatario_domicilio || '',
         oficinas_texto: full_oficinas_texto,
         oficinas_texto_2: full_oficinas_texto_2,
+        oficinas_texto_3: full_oficinas_texto_3,
+        oficinas_texto_4: full_oficinas_texto_4,
         superficie_texto: superficie_texto,
+
+
         plazo_meses: rawData.plazo_meses || '12',
         dias_aviso: rawData.dias_aviso || '60',
         monto_renta_uf: rawData.monto_renta_uf || '0',
-        porcentaje_multa_atraso: rawData.porcentaje_multa_atraso || '5',
+        // Extra fields from yellow highlights
+        arrendatario_telefono: rawData.arrendatario_telefono || '',
+        arrendatario_email: rawData.arrendatario_email || '',
+        oficinas_simples: validOfis.join(' y '),
+        oficinas_simples_2: validOfis.length > 1 ? validOfis.slice(1).join(' y ') : '',
+        estacionamientos_simples: validEstacs.join(' y '),
         // Signature fields
         firma_nombre: rawFirmaNombre,
         firma_rut: rawFirmaRut,
