@@ -53,7 +53,7 @@ xml = deep_clean_replace(xml, 'La oficina N 803 y 802 tienen una superficie apro
 
 # D-PREFIX
 xml = deep_clean_replace(xml, 'D803 y D802', 
-    '{#multiple_ofis}{oficinas_lista_d}{/multiple_ofis}{^multiple_ofis}D{oficina_unica}{/multiple_ofis}')
+    '{#multiple_ofis}{oficinas_lista_d} {/multiple_ofis}{^multiple_ofis}D{oficina_unica} {/multiple_ofis}')
 
 # 3. Individual fields
 fields = [

@@ -9,9 +9,6 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 const DOM = {
-    apiKeyInput: $('#apiKeyInput'),
-    saveApiKey: $('#saveApiKey'),
-    toggleApiKeyVisibility: $('#toggleApiKeyVisibility'),
     apiKeyStatus: $('#apiKeyStatus'),
     contractType: $('#contractType'),
     tabManual: $('#tabManual'),
@@ -49,37 +46,7 @@ const DOM = {
 // ──────────────────────────────────────────────
 let batchData = null; // Parsed rows from CSV/Excel
 
-// ──────────────────────────────────────────────
-// API KEY MANAGEMENT
-// ──────────────────────────────────────────────
-function loadApiKey() {
-    const saved = localStorage.getItem('gemini_api_key');
-    if (saved) {
-        DOM.apiKeyInput.value = saved;
-        showApiKeyStatus('✓ API Key cargada desde tu navegador', 'text-emerald-400');
-    }
-}
 
-function saveApiKey() {
-    const key = DOM.apiKeyInput.value.trim();
-    if (!key) {
-        showApiKeyStatus('⚠ Ingresa una API Key válida', 'text-amber-400');
-        return;
-    }
-    localStorage.setItem('gemini_api_key', key);
-    showApiKeyStatus('✓ API Key guardada exitosamente', 'text-emerald-400');
-}
-
-function getApiKey() {
-    return DOM.apiKeyInput.value.trim() || localStorage.getItem('gemini_api_key') || '';
-}
-
-function showApiKeyStatus(msg, colorClass) {
-    DOM.apiKeyStatus.textContent = msg;
-    DOM.apiKeyStatus.className = `mt-3 text-xs ${colorClass}`;
-    DOM.apiKeyStatus.classList.remove('hidden');
-    setTimeout(() => DOM.apiKeyStatus.classList.add('hidden'), 4000);
-}
 
 // ──────────────────────────────────────────────
 // TAB SWITCHING
@@ -99,52 +66,7 @@ function switchTab(tab) {
     hideResults();
 }
 
-// ──────────────────────────────────────────────
-// GEMINI API CALL
-// ──────────────────────────────────────────────
-async function callGeminiAPI(prompt) {
-    const apiKey = getApiKey();
-    if (!apiKey) {
-        throw new Error('No has configurado tu API Key de Google Gemini. Pégala en el campo de arriba y presiona "Guardar Key".');
-    }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{
-                parts: [{ text: prompt }]
-            }],
-            generationConfig: {
-                temperature: 0.3,
-                maxOutputTokens: 8192,
-            }
-        })
-    });
-
-    if (!response.ok) {
-        const errBody = await response.json().catch(() => ({}));
-        if (response.status === 400) {
-            throw new Error('API Key inválida o solicitud malformada. Verifica que tu API Key sea correcta.');
-        } else if (response.status === 429) {
-            throw new Error('Has excedido el límite de la API gratuita. Espera unos minutos e intenta de nuevo.');
-        } else if (response.status === 403) {
-            throw new Error('API Key sin permisos. Asegúrate de haber habilitado la API de Generative Language en tu proyecto de Google.');
-        }
-        throw new Error(`Error de la API (${response.status}): ${errBody?.error?.message || 'Error desconocido'}`);
-    }
-
-    const json = await response.json();
-    const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!text) {
-        throw new Error('La API no devolvió texto. Intenta de nuevo.');
-    }
-
-    return text.trim();
-}
 
 // ──────────────────────────────────────────────
 // GENERATE .DOCX FILE
@@ -317,7 +239,7 @@ function buildContractData(rawData) {
 
         sup_lista: formatList(validSup),
         sup_unica: validSup[0] || '',
-        oficinas_lista_d: formatListD(validOfis),
+        oficinas_lista_d: formatListD(validOfis) + ' ', // Fix Bug 2 (plural)
 
         // Basic Info
         fecha_contrato: rawData.fecha_contrato || '',
@@ -335,10 +257,10 @@ function buildContractData(rawData) {
         porcentaje_multa_atraso: rawData.porcentaje_multa_atraso || '',
 
         arrendatario_telefono: Array.isArray(rawData.arrendatario_telefono) ? Array.from(new Set(rawData.arrendatario_telefono.map(v => String(v).trim()).filter(Boolean)))[0] || '' : String(rawData.arrendatario_telefono || '').trim(),
-        arrendatario_email: Array.isArray(rawData.arrendatario_email) ? Array.from(new Set(rawData.arrendatario_email.map(v => String(v).trim()).filter(Boolean)))[0] || '' : String(rawData.arrendatario_email || '').trim(),
+        arrendatario_email: (Array.isArray(rawData.arrendatario_email) ? Array.from(new Set(rawData.arrendatario_email.map(v => String(v).trim()).filter(Boolean)))[0] || '' : String(rawData.arrendatario_email || '').trim()) + '\n', // Fix Bug 1
 
         // Signature fields
-        firma_nombre: rawFirmaNombre,
+        firma_nombre: rawFirmaNombre + '\n', // Fix Bug 1
         firma_rut: rawFirmaRut,
         firma_empresa: rep_nombre ? `pp. ${rawData.arrendatario_nombre}` : ''
     };
@@ -556,15 +478,7 @@ function initDragAndDrop() {
     DOM.removeFile.addEventListener('click', removeUploadedFile);
 }
 
-// ──────────────────────────────────────────────
-// API KEY VISIBILITY TOGGLE
-// ──────────────────────────────────────────────
-function initApiKeyToggle() {
-    DOM.toggleApiKeyVisibility.addEventListener('click', () => {
-        const input = DOM.apiKeyInput;
-        input.type = input.type === 'password' ? 'text' : 'password';
-    });
-}
+
 
 // ──────────────────────────────────────────────
 // DYNAMIC ROWS
@@ -613,20 +527,6 @@ function initDynamicRows() {
 // INITIALIZATION
 // ──────────────────────────────────────────────
 function init() {
-    // Load saved API key
-    loadApiKey();
-
-    // API Key save button
-    DOM.saveApiKey.addEventListener('click', saveApiKey);
-
-    // Allow saving with Enter key
-    DOM.apiKeyInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); saveApiKey(); }
-    });
-
-    // Toggle API key visibility
-    initApiKeyToggle();
-
     // Tab switching
     DOM.tabManual.addEventListener('click', () => switchTab('manual'));
     DOM.tabBatch.addEventListener('click', () => switchTab('batch'));
@@ -649,5 +549,79 @@ function init() {
     });
 }
 
+// ──────────────────────────────────────────────
+// INVENTORY UPDATE LOGIC
+// ──────────────────────────────────────────────
+async function handleInventoryUpdate() {
+    const fileCrm = $('#file_crm').files[0];
+    const fileEstatus = $('#file_estatus').files[0];
+    const btn = $('#btnActualizarEstatus');
+
+    if (!fileCrm || !fileEstatus) {
+        showError('Por favor selecciona ambos archivos (CRM y Estatus).');
+        return;
+    }
+
+    setLoadingState(btn, true);
+    hideError();
+    hideResults();
+    showProgress('Actualizando inventario...', 30, 'Procesando archivos y calculando estados.');
+
+    const formData = new FormData();
+    formData.append('file_crm', fileCrm);
+    formData.append('file_estatus', fileEstatus);
+
+    try {
+        const response = await fetch('/api/update_status', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || 'Error en el servidor al actualizar el estatus.');
+        }
+
+        const blob = await response.blob();
+        saveAs(blob, 'Estatus_Actualizado.xlsx');
+
+        showProgress('¡Listo!', 100, 'El archivo se ha descargado correctamente.');
+        showResult('Inventario actualizado con éxito.', [{
+            label: 'Cerrar',
+            onClick: hideResults
+        }]);
+
+    } catch (error) {
+        showError(error.message);
+    } finally {
+        setLoadingState(btn, false);
+        hideProgress();
+    }
+}
+
+function initInventoryUpdateUI() {
+    const inputCrm = $('#file_crm');
+    const labelCrm = $('#label_crm');
+    const inputEstatus = $('#file_estatus');
+    const labelEstatus = $('#label_estatus');
+
+    inputCrm.addEventListener('change', (e) => {
+        const name = e.target.files[0]?.name || 'Seleccionar archivo...';
+        labelCrm.textContent = name;
+        labelCrm.classList.toggle('text-white', !!e.target.files[0]);
+    });
+
+    inputEstatus.addEventListener('change', (e) => {
+        const name = e.target.files[0]?.name || 'Seleccionar archivo...';
+        labelEstatus.textContent = name;
+        labelEstatus.classList.toggle('text-white', !!e.target.files[0]);
+    });
+
+    $('#btnActualizarEstatus').addEventListener('click', handleInventoryUpdate);
+}
+
 // Start the app
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+    initInventoryUpdateUI();
+});
