@@ -19,14 +19,17 @@ def deep_clean_replace(xml, phrase, replacement):
     phrase = ' '.join(phrase.split())
     for i, char in enumerate(phrase):
         if char == ' ':
-            pattern += r'(\s|(<[^>]+>))+'
+            pattern += r'(\s|(<(?!/?w:p)[^>]+>))+'
         elif char.lower() in 'aeiouáéíóúüñ':
-            pattern += r'[a-zA-Záéíóúüñ](<[^>]+>)*' # Match any vowel/accented
+            pattern += r'[a-zA-Záéíóúüñ]'
         elif char.lower() == 'n':
-            # Handle N, N°, Nº
-            pattern += r'n(<[^>]+>)*(\.?.?)?(<[^>]+>)*'
+            pattern += r'n(<(?!/?w:p)[^>]+>)*(\.?.?)?'
         else:
-            pattern += re.escape(char) + r'(<[^>]+>)*'
+            pattern += re.escape(char)
+        
+        # Only allow tags BETWEEN characters, not after the last one
+        if i < len(phrase) - 1:
+            pattern += r'(<(?!/?w:p)[^>]+>)*'
     
     return re.sub(pattern, replacement, xml, flags=re.IGNORECASE | re.DOTALL)
 
@@ -78,8 +81,21 @@ fields = [
 for f_text, f_rep in fields:
     xml = deep_clean_replace(xml, f_text, f_rep)
 
-# 4. Final Cleanup of any remaining 803 or 802 tags that might be missed by long phrases
-# Be careful not to replace tags themselves.
+# 5. Final Structure Fixes
+# Ensure each contact field is in its own paragraph and exactly 22 empty paragraphs before PERSONERÍAS
+empty_p = '<w:p><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/><w:jc w:val="both"/></w:pPr></w:p>'
+
+# Fix potential collapse of contact lines (if any replacement killed paragraph tags)
+# We find the jumbled patterns and restore them.
+xml = xml.replace('{representante_nombre}Dirección', '{representante_nombre}</w:t></w:r></w:p><w:p><w:r><w:t>Dirección')
+xml = xml.replace('{arrendatario_domicilio}Teléfono', '{arrendatario_domicilio}</w:t></w:r></w:p><w:p><w:r><w:t>Teléfono')
+xml = xml.replace('{arrendatario_telefono}Correo', '{arrendatario_telefono}</w:t></w:r></w:p><w:p><w:r><w:t>Correo')
+
+# Personerias Spacing
+xml = deep_clean_replace(xml, 'PERSONERÍAS', (empty_p * 22) + 'PERSONERÍAS')
+xml = deep_clean_replace(xml, 'PERSONERIAS', (empty_p * 22) + 'PERSONERIAS')
+
+# 6. Final Cleanup
 xml = xml.replace('32,00 y 20,81', '{sup_lista}')
 xml = xml.replace('cuarto subterráneo', '{ubi_estac}')
 
