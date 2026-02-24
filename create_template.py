@@ -72,7 +72,11 @@ xml = xml.replace('la oficina N° {oficina_unica}, N°{oficina_2_temp} del {piso
 xml = xml.replace('La oficina {oficina_unica} y N°{oficina_2_temp} tienen una superficie aproximada de {sup_lista} y {sup_2_temp} metros cuadrados',
     '{#multiple_ofis}Las oficinas N°{oficinas_lista} tienen una superficie aproximada de {sup_lista} metros cuadrados{/multiple_ofis}{^multiple_ofis}La oficina N°{oficina_unica} tiene una superficie aproximada de {sup_unica} metros cuadrados{/multiple_ofis}')
 
-# 3. Limpieza de temporales y firmas
+# 3. Garantía (DÉCIMO OCTAVO)
+xml = xml.replace('la suma de {monto_renta_uf}Unidades de Fomento, sin IVA', 
+                 'la suma de {monto_garantia_uf} Unidades de Fomento, sin IVA')
+
+# 4. Limpieza de temporales y firmas
 xml = xml.replace('{oficina_2_temp}', '').replace('{sup_2_temp}', '')
 xml = xml.replace('pp. {arrendatario_nombre}', '{firma_empresa}')
 

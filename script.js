@@ -254,6 +254,7 @@ function buildContractData(rawData) {
         plazo_meses: rawData.plazo_meses || '',
         dias_aviso: rawData.dias_aviso || '',
         monto_renta_uf: rawData.monto_renta_uf || '',
+        monto_garantia_uf: rawData.monto_garantia_uf || '',
         porcentaje_multa_atraso: rawData.porcentaje_multa_atraso || '',
 
         arrendatario_telefono: Array.isArray(rawData.arrendatario_telefono) ? Array.from(new Set(rawData.arrendatario_telefono.map(v => String(v).trim()).filter(Boolean)))[0] || '' : String(rawData.arrendatario_telefono || '').trim(),
