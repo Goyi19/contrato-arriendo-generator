@@ -80,12 +80,7 @@ xml = xml.replace('la suma de {monto_renta_uf}Unidades de Fomento, sin IVA',
 xml = xml.replace('{oficina_2_temp}', '').replace('{sup_2_temp}', '')
 xml = xml.replace('pp. {arrendatario_nombre}', '{firma_empresa}')
 
-# 4. Restauración de Espaciado (22 líneas antes de PERSONERÍAS)
-empty_p = '<w:p><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/><w:jc w:val="both"/></w:pPr></w:p>'
-if 'PERSONER' in xml:
-    xml = re.sub(r'PERSONER[IÍ]AS', (empty_p * 22) + 'PERSONERÍAS', xml)
-
-# Guardar nuevo template.docx
+# 5. Guardar nuevo template.docx
 with zipfile.ZipFile(docx_path, 'r') as z_in:
     with zipfile.ZipFile(new_path, 'w') as z_out:
         for item in z_in.infolist():
