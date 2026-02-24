@@ -43,9 +43,13 @@ xml = deep_clean_replace(xml, 'la oficina número 803 y 802 ubicada en el octavo
 xml = deep_clean_replace(xml, 'la oficina número 803, 802 del octavo piso', 
     '{#multiple_ofis}las oficinas número {oficinas_lista} del {piso}{/multiple_ofis}{^multiple_ofis}la oficina número {oficina_unica} del {piso}{/multiple_ofis}')
 
-# PARKING (Using ubi_estac)
+# PARKING (Body variant 1: "y estacionamiento...")
 xml = deep_clean_replace(xml, 'y estacionamiento 195 del cuarto subterráneo', 
     '{#tiene_estac} y {#multiple_estac}los estacionamientos {estacs_lista}{/multiple_estac}{^multiple_estac}el estacionamiento {estac_unico}{/multiple_estac} del {ubi_estac}{/tiene_estac}{^tiene_estac} sin estacionamientos{/tiene_estac}')
+
+# PARKING (Body variant 2: "conjuntamente el estacionamiento...")
+xml = deep_clean_replace(xml, 'conjuntamente el estacionamiento 195 del cuarto subterráneo', 
+    '{#tiene_estac}conjuntamente {#multiple_estac}los estacionamientos {estacs_lista}{/multiple_estac}{^multiple_estac}el estacionamiento {estac_unico}{/multiple_estac} del {ubi_estac}{/tiene_estac}')
 
 # SURFACE
 xml = deep_clean_replace(xml, 'La oficina N 803 y 802 tienen una superficie aproximada de 32,00 y 20,81 metros cuadrados', 
@@ -78,6 +82,9 @@ for f_text, f_rep in fields:
 # Be careful not to replace tags themselves.
 xml = xml.replace('32,00 y 20,81', '{sup_lista}')
 xml = xml.replace('cuarto subterráneo', '{ubi_estac}')
+
+# 5. Fix remaining hardcoded 195 if any (signatures or specific mentions)
+xml = deep_clean_replace(xml, 'estacionamiento 195', '{#tiene_estac}{#multiple_estac}estacionamientos {estacs_lista}{/multiple_estac}{^multiple_estac}estacionamiento {estac_unico}{/multiple_estac}{/tiene_estac}')
 
 with zipfile.ZipFile(docx_path, 'r') as z_in:
     with zipfile.ZipFile(new_path, 'w') as z_out:
