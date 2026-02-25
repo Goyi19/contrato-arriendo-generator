@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import pandas as pd
 import googlemaps
-from time import sleep
+from time import sleep, time
 import math
 import io
 import os
@@ -89,6 +89,7 @@ class BuscadorLugares:
 
 @app.route('/api/analyze_zone', methods=['POST'])
 def analyze_zone():
+    start_time = time()
     try:
         data = request.json
         api_key = data.get('api_key')
@@ -137,14 +138,24 @@ def analyze_zone():
             # Re-definir buscar_con_paginacion para que pase el modo:
             def buscar_parcheado(ubicacion, radio, tipo=None, keyword=None, cat_name="N/A"):
                 try:
+                    if time() - start_time > 8.5:
+                        return # Prevenir timeout de Vercel
+                    
                     if tipo:
                         resultado = buscador.gmaps.places_nearby(location=ubicacion, radius=radio, type=tipo)
                     else:
                         resultado = buscador.gmaps.places_nearby(location=ubicacion, radius=radio, keyword=keyword)
+                    
+                    if not resultado: return
                     buscador._procesar_resultados(resultado.get('results', []), cat_name, buscador.current_modo, ubicacion)
+                    
                     paginas_adicionales = 0
                     while 'next_page_token' in resultado and paginas_adicionales < 2:
-                        sleep(2)
+                        # Si sumamos 2 seg de delay, excedemos limite Vercel?
+                        if time() - start_time > 6.5:
+                            break # No hay tiempo para página 2
+                            
+                        sleep(2.0)
                         next_token = resultado['next_page_token']
                         resultado = buscador.gmaps.places_nearby(page_token=next_token)
                         if len(resultado.get('results', [])) > 0:
@@ -155,10 +166,15 @@ def analyze_zone():
             
             if tipos:
                 for t in tipos:
+                    if time() - start_time > 8.5: break
                     buscar_parcheado((lat, lng), radio=radius, tipo=t, cat_name=name)
             if keywords:
                 for kw in keywords:
+                    if time() - start_time > 8.5: break
                     buscar_parcheado((lat, lng), radio=radius, keyword=kw, cat_name=name)
+            
+            if time() - start_time > 8.5: 
+                break # Sale del loop de categorías si no hay tiempo
         
         # Filtrar distancia max
         df = pd.DataFrame(buscador.resultados)
