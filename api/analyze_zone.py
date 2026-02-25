@@ -138,8 +138,8 @@ def analyze_zone():
             # Re-definir buscar_con_paginacion para que pase el modo:
             def buscar_parcheado(ubicacion, radio, tipo=None, keyword=None, cat_name="N/A"):
                 try:
-                    if time() - start_time > 8.5:
-                        return # Prevenir timeout de Vercel
+                    if time() - start_time > 55:
+                        return # Prevenir timeout de Vercel (nuevo límite 60s)
                     
                     if tipo:
                         resultado = buscador.gmaps.places_nearby(location=ubicacion, radius=radio, type=tipo)
@@ -152,7 +152,7 @@ def analyze_zone():
                     paginas_adicionales = 0
                     while 'next_page_token' in resultado and paginas_adicionales < 2:
                         # Si sumamos 2 seg de delay, excedemos limite Vercel?
-                        if time() - start_time > 6.5:
+                        if time() - start_time > 50:
                             break # No hay tiempo para página 2
                             
                         sleep(2.0)
@@ -166,14 +166,14 @@ def analyze_zone():
             
             if tipos:
                 for t in tipos:
-                    if time() - start_time > 8.5: break
+                    if time() - start_time > 55: break
                     buscar_parcheado((lat, lng), radio=radius, tipo=t, cat_name=name)
             if keywords:
                 for kw in keywords:
-                    if time() - start_time > 8.5: break
+                    if time() - start_time > 55: break
                     buscar_parcheado((lat, lng), radio=radius, keyword=kw, cat_name=name)
             
-            if time() - start_time > 8.5: 
+            if time() - start_time > 55: 
                 break # Sale del loop de categorías si no hay tiempo
         
         # Filtrar distancia max
