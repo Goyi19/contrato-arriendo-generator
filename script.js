@@ -39,6 +39,7 @@ const DOM = {
     btnAddOffice: $('#btnAddOffice'),
     estacionamientosContainer: $('#estacionamientosContainer'),
     btnAddParking: $('#btnAddParking'),
+    btnDownloadTemplate: $('#btnDownloadTemplate'),
 };
 
 // ──────────────────────────────────────────────
@@ -548,6 +549,9 @@ function init() {
             e.target.value = 'arriendo';
         }
     });
+
+    // Template download
+    DOM.btnDownloadTemplate.addEventListener('click', downloadExcelTemplate);
 }
 
 // ──────────────────────────────────────────────
@@ -619,6 +623,50 @@ function initInventoryUpdateUI() {
     });
 
     $('#btnActualizarEstatus').addEventListener('click', handleInventoryUpdate);
+}
+
+// ──────────────────────────────────────────────
+// TEMPLATE DOWNLOAD LOGIC
+// ──────────────────────────────────────────────
+function downloadExcelTemplate() {
+    // Definimos los encabezados exactos que tu script espera
+    const headers = [
+        "arrendatario_nombre", "arrendatario_rut", "arrendatario_domicilio",
+        "arrendatario_telefono", "arrendatario_email", "representante_nombre",
+        "representante_rut", "piso", "ubi_estacionamiento", "oficinas",
+        "superficie", "estacionamientos", "fecha_contrato", "plazo_meses",
+        "monto_renta_uf", "monto_garantia_uf", "porcentaje_multa_atraso", "dias_aviso"
+    ];
+
+    // Fila de ejemplo con formato real
+    const exampleRow = {
+        "arrendatario_nombre": "Inversiones San Juan SpA",
+        "arrendatario_rut": "76.123.456-7",
+        "arrendatario_domicilio": "Av. Providencia 1234, Of. 501, Providencia",
+        "arrendatario_telefono": "+569 1234 5678",
+        "arrendatario_email": "contacto@empresa.cl",
+        "representante_nombre": "Juan Pérez Rodríguez",
+        "representante_rut": "12.345.678-9",
+        "piso": "octavo piso",
+        "ubi_estacionamiento": "cuarto subterráneo",
+        "oficinas": "802 y 803",
+        "superficie": "32,00 y 20,81",
+        "estacionamientos": "195 y 196",
+        "fecha_contrato": "01 Marzo de 2026",
+        "plazo_meses": 12,
+        "monto_renta_uf": 25.5,
+        "monto_garantia_uf": 30,
+        "porcentaje_multa_atraso": 5,
+        "dias_aviso": 60
+    };
+
+    // Crear el libro de trabajo usando SheetJS (XLSX)
+    const worksheet = XLSX.utils.json_to_sheet([exampleRow], { header: headers });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Plantilla_Contratos");
+
+    // Forzar descarga
+    XLSX.writeFile(workbook, "Plantilla_Generacion_Masiva.xlsx");
 }
 
 // Start the app
