@@ -72,13 +72,18 @@ function switchTab(tab) {
 // ──────────────────────────────────────────────
 // GENERATE .DOCX FILE
 // ──────────────────────────────────────────────
-async function generateDocx(templateData, fileName) {
-    // 1. Cargar la plantilla original
-    const response = await fetch('template.docx');
-    if (!response.ok) {
-        throw new Error('No se pudo cargar la plantilla base (template.docx).');
+// ACTUALIZADO: Acepta buffer opcional para evitar múltiples fetch en modo masivo
+async function generateDocx(templateData, fileName, baseBuffer = null) {
+    let arrayBuffer = baseBuffer;
+
+    // 1. Cargar la plantilla original (solo si no se pasó un buffer)
+    if (!arrayBuffer) {
+        const response = await fetch('template.docx');
+        if (!response.ok) {
+            throw new Error('No se pudo cargar la plantilla base (template.docx).');
+        }
+        arrayBuffer = await response.arrayBuffer();
     }
-    const arrayBuffer = await response.arrayBuffer();
 
     // 2. Cargar en PizZip
     const PizZip = window.PizZip;
@@ -393,6 +398,11 @@ async function handleBatchGenerate() {
     let failed = 0;
 
     try {
+        // OPTIMIZACIÓN: Cargar la plantilla una sola vez para todo el lote
+        const response = await fetch('template.docx');
+        if (!response.ok) throw new Error('No se pudo cargar la plantilla base.');
+        const baseBuffer = await response.arrayBuffer();
+
         for (let i = 0; i < total; i++) {
             const row = batchData[i];
             const rowNum = i + 1;
@@ -406,10 +416,12 @@ async function handleBatchGenerate() {
 
             try {
                 const templateData = buildContractData(row);
-                const blob = await generateDocx(templateData, name);
+                // Pasar el baseBuffer para ganar velocidad
+                const blob = await generateDocx(templateData, name, baseBuffer);
 
                 const safeName = name.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, '').replace(/\s+/g, '_');
-                zip.file(`Contrato_${safeName}.docx`, blob);
+                // SOLUCIÓN: Agregar rowNum al nombre del archivo para evitar colisiones si el nombre se repite
+                zip.file(`${rowNum}_Contrato_${safeName}.docx`, blob);
                 successful++;
             } catch (err) {
                 console.error(`Error en fila ${rowNum}:`, err);
