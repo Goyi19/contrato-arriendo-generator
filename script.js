@@ -597,6 +597,9 @@ function init() {
     // Dynamic rows
     initDynamicRows();
 
+    // Init Scraping / Analisis Territorial
+    initScrapingEvents();
+
     // Contract type change (show alert for disabled types)
     DOM.contractType.addEventListener('change', (e) => {
         if (e.target.value !== 'arriendo') {
@@ -711,5 +714,312 @@ function downloadExcelTemplate() {
     XLSX.writeFile(workbook, "Plantilla_Generacion_Masiva.xlsx");
 }
 
+// ──────────────────────────────────────────────
+// SCRAPING & TERRITORIAL ANALYSIS LOGIC
+// ──────────────────────────────────────────────
+let map, mainMarker, radiusCircle;
+let currentMode = "Comercial";
+let categoriesData = null;
+let scrapingPins = [];
+
+async function fetchCategories() {
+    try {
+        const response = await fetch('/api/categories');
+        if (!response.ok) throw new Error("Network Error");
+        categoriesData = await response.json();
+    } catch (err) {
+        console.warn("Fallo al obtener config de la API. Cargando configuración completa desde archivo local fallback...");
+        try {
+            const fbResponse = await fetch('/categories_dump.json');
+            categoriesData = await fbResponse.json();
+        } catch (fbErr) {
+            console.error("No se pudo cargar el fallback local", fbErr);
+        }
+    }
+    renderCheckboxes();
+}
+
+function renderCheckboxes() {
+    const container = $('#categoriesContainer');
+    if (!categoriesData) return;
+
+    container.innerHTML = '';
+
+    Object.keys(categoriesData).forEach(modo => {
+        const cats = categoriesData[modo];
+        if (Object.keys(cats).length === 0) return;
+
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'mb-4';
+
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'flex items-center justify-between mb-2';
+
+        const title = document.createElement('h4');
+        title.className = `text-xs font-bold uppercase tracking-wider ${modo === 'Comercial' ? 'text-amber-500' : 'text-emerald-500'}`;
+        title.innerHTML = modo === 'Comercial' ? '🏢 Locales Comerciales' : '📍 Fuentes de Flujo';
+
+        const btnSelectAll = document.createElement('button');
+        btnSelectAll.type = 'button';
+        btnSelectAll.className = 'text-[10px] text-gray-400 hover:text-white transition-colors underline';
+        btnSelectAll.innerText = 'Seleccionar Todos';
+        let allSelected = false;
+
+        headerDiv.appendChild(title);
+        headerDiv.appendChild(btnSelectAll);
+        groupDiv.appendChild(headerDiv);
+
+        const scrollWrapper = document.createElement('div');
+        scrollWrapper.className = 'max-h-48 overflow-y-auto pr-2 border border-white/5 rounded-lg bg-black/20 p-2';
+
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2';
+
+        const checkboxes = [];
+
+        Object.keys(cats).forEach(key => {
+            const cat = cats[key];
+            const label = document.createElement('label');
+            label.className = 'flex items-center gap-3 p-1.5 rounded-lg hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-white/10';
+
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.value = key;
+            cb.dataset.modo = modo;
+            cb.className = 'w-3.5 h-3.5 rounded border-gray-600 text-brand-500 focus:ring-brand-500/50 bg-gray-900/50 cat-checkbox';
+
+            const span = document.createElement('span');
+            span.className = 'text-xs text-gray-300 select-none';
+            span.innerText = cat.descripcion;
+
+            label.appendChild(cb);
+            label.appendChild(span);
+            gridDiv.appendChild(label);
+
+            checkboxes.push(cb);
+        });
+
+        btnSelectAll.addEventListener('click', () => {
+            allSelected = !allSelected;
+            checkboxes.forEach(cb => cb.checked = allSelected);
+            btnSelectAll.innerText = allSelected ? 'Deseleccionar Todos' : 'Seleccionar Todos';
+        });
+
+        scrollWrapper.appendChild(gridDiv);
+        groupDiv.appendChild(scrollWrapper);
+        container.appendChild(groupDiv);
+    });
+}
+
+function initGoogleMaps(apiKey) {
+    if (window.google && window.google.maps) {
+        setupMap();
+        return;
+    }
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.onload = () => {
+        setupMap();
+    };
+    script.onerror = () => {
+        alert("La API Key ingresada no es válida o hay un error de conexión.");
+        setLoadingState($('#btnInitMap'), false);
+    };
+    document.head.appendChild(script);
+}
+
+function setupMap() {
+    $('#scrapingControls').classList.remove('hidden');
+    $('#btnInitMap').classList.add('hidden');
+    $('#gmapsApiKey').disabled = true;
+
+    const center = { lat: -33.4372, lng: -70.6506 }; // Santiago default
+    map = new google.maps.Map($('#mapContainer'), {
+        center,
+        zoom: 13,
+        mapTypeControl: false,
+        streetViewControl: false,
+        styles: [{ "featureType": "all", "elementType": "labels.text.fill", "stylers": [{ "color": "#ffffff" }] }, { "featureType": "all", "elementType": "labels.text.stroke", "stylers": [{ "color": "#000000" }, { "lightness": 13 }] }, { "featureType": "administrative", "elementType": "geometry.fill", "stylers": [{ "color": "#000000" }] }, { "featureType": "administrative", "elementType": "geometry.stroke", "stylers": [{ "color": "#144b53" }, { "lightness": 14 }, { "weight": 1.4 }] }, { "featureType": "landscape", "elementType": "all", "stylers": [{ "color": "#08304b" }] }, { "featureType": "poi", "elementType": "geometry", "stylers": [{ "color": "#0c4152" }, { "lightness": 5 }] }, { "featureType": "road.highway", "elementType": "geometry.fill", "stylers": [{ "color": "#000000" }] }, { "featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [{ "color": "#0b434f" }, { "lightness": 25 }] }, { "featureType": "road.arterial", "elementType": "geometry.fill", "stylers": [{ "color": "#000000" }] }, { "featureType": "road.arterial", "elementType": "geometry.stroke", "stylers": [{ "color": "#0b3d51" }, { "lightness": 16 }] }, { "featureType": "road.local", "elementType": "geometry", "stylers": [{ "color": "#000000" }] }, { "featureType": "transit", "elementType": "all", "stylers": [{ "color": "#146474" }] }, { "featureType": "water", "elementType": "all", "stylers": [{ "color": "#021019" }] }]
+    });
+
+    mainMarker = new google.maps.Marker({
+        position: center,
+        map,
+        draggable: true,
+        title: "Centro de Búsqueda"
+    });
+
+    radiusCircle = new google.maps.Circle({
+        map,
+        radius: 1000,
+        fillColor: '#6366f1',
+        fillOpacity: 0.15,
+        strokeColor: '#818cf8',
+        strokeWeight: 2,
+    });
+    radiusCircle.bindTo('center', mainMarker, 'position');
+
+    const slider = $('#radiusSlider');
+    const radVal = $('#radiusValue');
+    slider.addEventListener('input', (e) => {
+        let r = parseInt(e.target.value);
+        if (r > 3000) { r = 3000; e.target.value = 3000; }
+        radiusCircle.setRadius(r);
+        radVal.textContent = r + 'm';
+        map.fitBounds(radiusCircle.getBounds());
+    });
+
+    mainMarker.addListener('dragend', () => {
+        map.panTo(mainMarker.getPosition());
+    });
+
+    const autocomplete = new google.maps.places.Autocomplete($('#mapSearchInput'));
+    autocomplete.bindTo('bounds', map);
+    autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place.geometry || !place.geometry.location) return;
+        map.panTo(place.geometry.location);
+        map.setZoom(15);
+        mainMarker.setPosition(place.geometry.location);
+    });
+}
+
+function initScrapingEvents() {
+    // Cargar categorías inmediatamente, sin depender de Google Maps
+    fetchCategories();
+
+    $('#btnInitMap')?.addEventListener('click', (e) => {
+        const apiKey = $('#gmapsApiKey').value.trim();
+        if (!apiKey) {
+            alert("Por favor, ingresa tu API Key para cargar el mapa.");
+            return;
+        }
+        setLoadingState(e.target, true);
+        initGoogleMaps(apiKey);
+    });
+
+
+
+    $('#btnAnalizarZona')?.addEventListener('click', handleAnalyzeZone);
+}
+
+function clearScrapingPins() {
+    scrapingPins.forEach(m => m.setMap(null));
+    scrapingPins = [];
+}
+
+function extractBase64(base64Data, filename) {
+    const byteCharacters = atob(base64Data);
+    const byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+        byteArrays.push(new Uint8Array(byteNumbers));
+    }
+    const blob = new Blob(byteArrays, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, filename);
+}
+
+async function handleAnalyzeZone() {
+    const checkedBoxes = Array.from(document.querySelectorAll('.cat-checkbox:checked')).map(cb => ({
+        id: cb.value,
+        modo: cb.dataset.modo
+    }));
+
+    if (checkedBoxes.length === 0) {
+        alert("Selecciona al menos una categoría a buscar.");
+        return;
+    }
+
+    const apiKey = $('#gmapsApiKey').value.trim();
+    if (!apiKey || !mainMarker) return;
+
+    const pos = mainMarker.getPosition();
+    const payload = {
+        api_key: apiKey,
+        lat: pos.lat(),
+        lng: pos.lng(),
+        radius: parseInt($('#radiusSlider').value),
+        categories: checkedBoxes
+    };
+
+    hideResults();
+    hideError();
+    setLoadingState($('#btnAnalizarZona'), true);
+    showProgress('Buscando ubicaciones...', 40, 'Analizando la zona (' + payload.radius + 'm)');
+    clearScrapingPins();
+
+    try {
+        const response = await fetch('/api/analyze_zone', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || "Error al analizar la zona.");
+        }
+
+        const data = await response.json();
+        const locations = data.places || [];
+        showProgress('Empaquetando reporte...', 90, `Se encontraron ${locations.length} lugares.`);
+
+        // Add pins to map
+        locations.forEach(loc => {
+            if (loc.Latitud && loc.Longitud) {
+                const isComercial = loc['Modo'] === 'Comercial';
+                const marker = new google.maps.Marker({
+                    position: { lat: parseFloat(loc.Latitud), lng: parseFloat(loc.Longitud) },
+                    map: map,
+                    title: loc.Nombre,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: isComercial ? 6 : 5,
+                        fillColor: isComercial ? '#f59e0b' : '#10b981',
+                        fillOpacity: 0.9,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 1,
+                    }
+                });
+
+                const badge = isComercial ?
+                    `<span class="px-1.5 py-0.5 bg-amber-500/20 text-amber-600 rounded text-[10px] uppercase font-bold tracking-wide">Comercial</span>` :
+                    `<span class="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-600 rounded text-[10px] uppercase font-bold tracking-wide">Flujo</span>`;
+
+                const info = new google.maps.InfoWindow({
+                    content: `<div class="p-2 min-w-32"><strong class="block text-gray-800 text-sm mb-1">${loc.Nombre}</strong>${badge} <span class="text-xs text-gray-500 ml-1">${loc['Categoría']}</span></div>`
+                });
+                marker.addListener('click', () => info.open(map, marker));
+                scrapingPins.push(marker);
+            }
+        });
+
+        const catCounts = {};
+        locations.forEach(l => {
+            const c = l['Categoría'] || 'Otro';
+            catCounts[c] = (catCounts[c] || 0) + 1;
+        });
+
+        const summaryText = Object.entries(catCounts).map(([cat, count]) => `${count} ${cat}`).join(', ');
+
+        showProgress('¡Listo!', 100, '');
+        showResult(`Análisis completado: ${locations.length} lugares únicos encontrados. (${summaryText})`, [{
+            label: `Descargar Reporte Excel`,
+            onClick: () => extractBase64(data.excel_b64, 'Reporte_Análisis_Territorial.xlsx')
+        }]);
+
+    } catch (error) {
+        showError(error.message);
+    } finally {
+        setLoadingState($('#btnAnalizarZona'), false);
+        hideProgress();
+    }
+}
+
 // Start the app
 document.addEventListener('DOMContentLoaded', init);
+
