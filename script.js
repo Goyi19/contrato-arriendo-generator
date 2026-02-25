@@ -50,6 +50,37 @@ let batchData = null; // Parsed rows from CSV/Excel
 
 
 // ──────────────────────────────────────────────
+// VIEW SWITCHING
+// ──────────────────────────────────────────────
+function switchView(viewName) {
+    const views = $$('.view-content');
+    const navItems = $$('.nav-item');
+
+    views.forEach(v => {
+        if (v.id === `view${viewName.charAt(0).toUpperCase() + viewName.slice(1)}`) {
+            v.classList.add('active');
+            v.classList.remove('hidden');
+        } else {
+            v.classList.remove('active');
+            v.classList.add('hidden');
+        }
+    });
+
+    navItems.forEach(item => {
+        if (item.dataset.view === viewName) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+
+    // Reset status sections when switching views
+    hideError();
+    hideResults();
+    hideProgress();
+}
+
+// ──────────────────────────────────────────────
 // TAB SWITCHING
 // ──────────────────────────────────────────────
 function switchTab(tab) {
@@ -541,6 +572,11 @@ function initDynamicRows() {
 // INITIALIZATION
 // ──────────────────────────────────────────────
 function init() {
+    // Sidebar navigation
+    $$('.nav-item').forEach(item => {
+        item.addEventListener('click', () => switchView(item.dataset.view));
+    });
+
     // Tab switching
     DOM.tabManual.addEventListener('click', () => switchTab('manual'));
     DOM.tabBatch.addEventListener('click', () => switchTab('batch'));
@@ -551,6 +587,12 @@ function init() {
     // Batch mode
     initDragAndDrop();
     DOM.btnGenerarLote.addEventListener('click', handleBatchGenerate);
+
+    // Inventory Update
+    const btnActualizarEstatus = $('#btnActualizarEstatus');
+    if (btnActualizarEstatus) {
+        btnActualizarEstatus.addEventListener('click', handleInventoryUpdate);
+    }
 
     // Dynamic rows
     initDynamicRows();
@@ -564,6 +606,14 @@ function init() {
 
     // Template download
     DOM.btnDownloadTemplate.addEventListener('click', downloadExcelTemplate);
+
+    // File input labels for inventory
+    $('#file_crm')?.addEventListener('change', (e) => {
+        $('#label_crm').textContent = e.target.files[0]?.name || 'Seleccionar archivo...';
+    });
+    $('#file_estatus')?.addEventListener('change', (e) => {
+        $('#label_estatus').textContent = e.target.files[0]?.name || 'Seleccionar archivo...';
+    });
 }
 
 // ──────────────────────────────────────────────
@@ -616,26 +666,6 @@ async function handleInventoryUpdate() {
     }
 }
 
-function initInventoryUpdateUI() {
-    const inputCrm = $('#file_crm');
-    const labelCrm = $('#label_crm');
-    const inputEstatus = $('#file_estatus');
-    const labelEstatus = $('#label_estatus');
-
-    inputCrm.addEventListener('change', (e) => {
-        const name = e.target.files[0]?.name || 'Seleccionar archivo...';
-        labelCrm.textContent = name;
-        labelCrm.classList.toggle('text-white', !!e.target.files[0]);
-    });
-
-    inputEstatus.addEventListener('change', (e) => {
-        const name = e.target.files[0]?.name || 'Seleccionar archivo...';
-        labelEstatus.textContent = name;
-        labelEstatus.classList.toggle('text-white', !!e.target.files[0]);
-    });
-
-    $('#btnActualizarEstatus').addEventListener('click', handleInventoryUpdate);
-}
 
 // ──────────────────────────────────────────────
 // TEMPLATE DOWNLOAD LOGIC
@@ -682,7 +712,4 @@ function downloadExcelTemplate() {
 }
 
 // Start the app
-document.addEventListener('DOMContentLoaded', () => {
-    init();
-    initInventoryUpdateUI();
-});
+document.addEventListener('DOMContentLoaded', init);

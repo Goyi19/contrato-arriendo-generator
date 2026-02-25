@@ -192,6 +192,43 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
 }
 
+/* ── Navigation Sidebar ── */
+.nav-item {
+    color: rgba(156, 163, 175, 0.7);
+    background: transparent;
+}
+
+.nav-item:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.nav-item.active {
+    color: #fff;
+    background: rgba(99, 102, 241, 0.1);
+    box-shadow: inset 2px 0 0 0 #6366f1;
+}
+
+@media (max-width: 768px) {
+    .nav-item.active {
+        box-shadow: inset 0 -2px 0 0 #6366f1;
+    }
+}
+
+.nav-item.active svg {
+    color: #818cf8;
+}
+
+/* ── View Management ── */
+.view-content {
+    display: none;
+}
+
+.view-content.active {
+    display: block;
+    animation: fadeIn 0.4s ease-out;
+}
+
 /* ── Custom Helpers ── */
 #oficinasContainer .office-row:not(:first-child) .remove-row,
 #estacionamientosContainer .parking-row:not(:first-child) .remove-row {

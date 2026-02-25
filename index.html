@@ -61,565 +61,651 @@
         </div>
     </div>
 
-    <!-- ═══════════════ HEADER ═══════════════ -->
-    <header class="relative border-b border-white/5 backdrop-blur-xl bg-gray-950/60">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-violet-500 flex items-center justify-center shadow-lg shadow-brand-500/25">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
-                <div>
-                    <h1
-                        class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                        ContratoAI</h1>
-                    <p class="text-xs text-gray-500 font-medium">Generador Inteligente de Contratos</p>
-                </div>
-            </div>
-            <a href="https://github.com" target="_blank"
-                class="text-xs text-gray-500 hover:text-gray-300 transition-colors hidden sm:block">v1.0</a>
-        </div>
-    </header>
+    <!-- ═══════════════ LAYOUT WRAPPER ═══════════════ -->
+    <div class="flex flex-col md:flex-row min-h-screen relative z-10">
 
-    <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6 animate-fade-in">
-
-
-
-        <!-- ── CONTRACT TYPE ── -->
-        <section class="glass-card rounded-2xl p-5 sm:p-6">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                </div>
-                <h2 class="text-sm font-semibold text-white">Tipo de Contrato</h2>
-            </div>
-            <select id="contractType"
-                class="w-full sm:w-80 bg-gray-900/60 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 transition-all appearance-none cursor-pointer select-arrow">
-                <option value="arriendo">📄 Contrato de Arriendo</option>
-                <option value="promesa" disabled>🔒 Promesa de Compraventa — Próximamente</option>
-                <option value="compraventa" disabled>🔒 Contrato de Compraventa — Próximamente</option>
-                <option value="comodato" disabled>🔒 Contrato de Comodato — Próximamente</option>
-            </select>
-        </section>
-
-        <!-- ── MODE TABS ── -->
-        <section class="glass-card rounded-2xl overflow-hidden">
-            <!-- Tab Headers -->
-            <div class="flex border-b border-white/5">
-                <button id="tabManual"
-                    class="tab-btn active flex-1 py-3.5 text-sm font-medium text-center transition-all relative"
-                    data-tab="manual">
-                    <span class="flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <!-- ── SIDEBAR ── -->
+        <aside
+            class="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/5 backdrop-blur-xl bg-gray-950/40 shrink-0">
+            <div class="p-6 sticky top-0">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 mb-8">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-violet-500 flex items-center justify-center shadow-lg shadow-brand-500/25">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        Modo Manual
-                    </span>
-                </button>
-                <button id="tabBatch"
-                    class="tab-btn flex-1 py-3.5 text-sm font-medium text-center transition-all relative"
-                    data-tab="batch">
-                    <span class="flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </div>
+                    <div>
+                        <h1
+                            class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                            ContratoAI</h1>
+                        <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Business Suite</p>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="space-y-1">
+                    <button
+                        class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group"
+                        data-view="generar">
+                        <svg class="w-5 h-5 opacity-60 group-hover:opacity-100 transition-opacity" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        Modo Masivo (Lote)
-                    </span>
-                </button>
-            </div>
-
-            <!-- ═══ MANUAL MODE PANEL ═══ -->
-            <div id="panelManual" class="tab-panel active p-5 sm:p-6">
-                <form id="manualForm" class="space-y-6">
-
-                    <!-- Arrendatario -->
-                    <fieldset class="space-y-4">
-                        <legend
-                            class="text-xs font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-                            <span class="w-5 h-px bg-emerald-500/50"></span> Datos del Arrendatario
-                        </legend>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Nombre / Razón
-                                    social</label>
-                                <input type="text" name="arrendatario_nombre" required
-                                    placeholder="Ej. Consultora ABC SpA" class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">RUT</label>
-                                <input type="text" name="arrendatario_rut" required placeholder="Ej. 76.123.456-7"
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Representante legal (si
-                                    aplica)</label>
-                                <input type="text" name="representante_nombre" placeholder="Ej. Juan Pérez López"
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">RUT del
-                                    representante</label>
-                                <input type="text" name="representante_rut" placeholder="Ej. 12.345.678-9"
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Teléfono</label>
-                                <input type="text" name="arrendatario_telefono" placeholder="Ej. +569..."
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
-                                <input type="email" name="arrendatario_email" placeholder="Ej. contacto@empresa.cl"
-                                    class="input-field" />
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Domicilio del
-                                    Arrendatario</label>
-                                <input type="text" name="arrendatario_domicilio" required
-                                    placeholder="Ej. Av. Apoquindo 3000, piso 5, Las Condes" class="input-field" />
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    <!-- Propiedad (Edificio Business Center) -->
-                    <fieldset class="space-y-4">
-                        <legend
-                            class="text-xs font-semibold text-violet-400 uppercase tracking-wider flex items-center gap-2">
-                            <span class="w-5 h-px bg-violet-500/50"></span> Propiedad — Edificio Business Center
-                        </legend>
-                        <div class="space-y-4">
-                            <!-- Pisos -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Piso Oficinas (ej.
-                                        octavo piso)</label>
-                                    <input type="text" name="piso" required placeholder="Ej. octavo piso"
-                                        class="input-field" />
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Ubicación
-                                        Estacionamientos (ej. cuarto subterráneo)</label>
-                                    <input type="text" name="ubi_estacionamiento" required
-                                        placeholder="Ej. cuarto subterráneo" class="input-field"
-                                        value="cuarto subterráneo" />
-                                </div>
-                            </div>
-
-                            <!-- Oficinas Container -->
-                            <div class="space-y-3">
-                                <label class="block text-xs font-medium text-gray-400">Oficinas y Superficies</label>
-                                <div id="oficinasContainer" class="space-y-2">
-                                    <div class="office-row flex gap-2 items-center">
-                                        <input type="text" name="oficina_num" required placeholder="Oficina (ej. 803)"
-                                            class="input-field flex-1" />
-                                        <input type="text" name="oficina_m2" required placeholder="M2 (ej. 32,00)"
-                                            class="input-field w-32" />
-                                        <button type="button"
-                                            class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors opacity-0 pointer-events-none">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button type="button" id="btnAddOffice"
-                                    class="text-xs font-medium text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    Agregar otra oficina
-                                </button>
-                            </div>
-
-                            <!-- Estacionamientos Container -->
-                            <div class="space-y-3">
-                                <label class="block text-xs font-medium text-gray-400">Estacionamientos</label>
-                                <div id="estacionamientosContainer" class="space-y-2">
-                                    <div class="parking-row flex gap-2 items-center">
-                                        <input type="text" name="estacionamiento_num" placeholder="N° Estac. (ej. 195)"
-                                            class="input-field flex-1" />
-                                        <button type="button"
-                                            class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors opacity-0 pointer-events-none">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button type="button" id="btnAddParking"
-                                    class="text-xs font-medium text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    Agregar otro estacionamiento
-                                </button>
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    <!-- Condiciones del Arriendo -->
-                    <fieldset class="space-y-4">
-                        <legend
-                            class="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                            <span class="w-5 h-px bg-amber-500/50"></span> Condiciones del Arriendo
-                        </legend>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Fecha del contrato</label>
-                                <input type="text" name="fecha_contrato" required
-                                    placeholder="Ej. 01 Septiembre de 2025" class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Plazo (meses)</label>
-                                <input type="number" name="plazo_meses" required placeholder="Ej. 12" min="1"
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Renta mensual (UF)</label>
-                                <input type="text" name="monto_renta_uf" required placeholder="Ej. 28"
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Garantía (UF)</label>
-                                <input type="text" name="monto_garantia_uf" required placeholder="Ej. 28"
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Multa por atraso
-                                    (%)</label>
-                                <input type="text" name="porcentaje_multa_atraso" placeholder="Ej. 5"
-                                    class="input-field" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Días de aviso para
-                                    término</label>
-                                <input type="number" name="dias_aviso" placeholder="Ej. 60" min="1"
-                                    class="input-field" />
-                            </div>
-                        </div>
-                    </fieldset>
-
-
-
-                    <!-- Submit -->
-                    <button type="submit" id="btnGenerar"
-                        class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-violet-600 hover:from-brand-500 hover:to-violet-500 text-white font-semibold rounded-xl transition-all hover:shadow-xl hover:shadow-brand-500/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Generar Contrato
+                        Generar Contratos
                     </button>
-                </form>
+                    <button
+                        class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group"
+                        data-view="inventario">
+                        <svg class="w-5 h-5 opacity-60 group-hover:opacity-100 transition-opacity" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01" />
+                        </svg>
+                        Estatus Proyectos
+                    </button>
+                </nav>
             </div>
+        </aside>
 
-            <!-- ═══ BATCH MODE PANEL ═══ -->
-            <div id="panelBatch" class="tab-panel p-5 sm:p-6 hidden">
-                <div class="space-y-5">
-                    <!-- Instructions -->
-                    <div class="bg-brand-500/5 border border-brand-500/10 rounded-xl p-4">
-                        <h3 class="text-sm font-semibold text-brand-300 mb-2">📋 Formato requerido del archivo</h3>
-                        <p class="text-xs text-gray-400 leading-relaxed mb-3">
-                            Sube un archivo <strong class="text-white">.csv</strong> o <strong
-                                class="text-white">.xlsx</strong> con las siguientes columnas (los nombres deben ser
-                            exactos):
-                        </p>
-                        <div class="overflow-x-auto">
-                            <table class="text-xs text-gray-400 w-full">
-                                <thead>
-                                    <tr class="border-b border-white/5">
-                                        <th class="text-left py-1.5 px-2 text-brand-300 font-medium">Columna</th>
-                                        <th class="text-left py-1.5 px-2 text-brand-300 font-medium">Ejemplo</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-white/5">
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">arrendatario_nombre</td>
-                                        <td class="py-1 px-2">Inversiones San Juan SpA</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">arrendatario_rut</td>
-                                        <td class="py-1 px-2">76.123.456-7</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">arrendatario_domicilio</td>
-                                        <td class="py-1 px-2">Av. Providencia 1234, Of. 501, Providencia</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">arrendatario_telefono</td>
-                                        <td class="py-1 px-2">+569 1234 5678</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">arrendatario_email</td>
-                                        <td class="py-1 px-2">contacto@empresa.cl</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">representante_nombre</td>
-                                        <td class="py-1 px-2">Juan Pérez Rodríguez</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">representante_rut</td>
-                                        <td class="py-1 px-2">12.345.678-9</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">piso</td>
-                                        <td class="py-1 px-2">octavo piso</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">ubi_estacionamiento</td>
-                                        <td class="py-1 px-2">cuarto subterráneo</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">oficinas</td>
-                                        <td class="py-1 px-2">802 y 803</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">superficie</td>
-                                        <td class="py-1 px-2">32,00 y 20,81</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">estacionamientos</td>
-                                        <td class="py-1 px-2">195 y 196</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">fecha_contrato</td>
-                                        <td class="py-1 px-2">01 Marzo de 2026</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">plazo_meses</td>
-                                        <td class="py-1 px-2">12</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">monto_renta_uf</td>
-                                        <td class="py-1 px-2">25.5</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">monto_garantia_uf</td>
-                                        <td class="py-1 px-2">30</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">porcentaje_multa_atraso</td>
-                                        <td class="py-1 px-2">5</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 px-2 font-mono text-violet-300">dias_aviso</td>
-                                        <td class="py-1 px-2">60</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+        <!-- ── MAIN CONTENT ── -->
+        <main class="flex-1 overflow-y-auto max-h-screen">
+            <div class="max-w-4xl mx-auto px-4 sm:px-8 py-8 md:py-12 space-y-6 animate-fade-in">
+
+                <!-- ═══════════════ VIEW: GENERAR CONTRATOS ═══════════════ -->
+                <div id="viewGenerar" class="view-content active space-y-6">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-white">Generar Contratos</h2>
+                        <p class="text-sm text-gray-500">Crea documentos legales de forma manual o masiva.</p>
                     </div>
 
-                    <!-- Botón Descargar Plantilla -->
-                    <div class="flex justify-end mb-4">
-                        <button type="button" id="btnDownloadTemplate"
-                            class="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-semibold text-brand-300 hover:bg-brand-500/10 hover:border-brand-500/30 transition-all active:scale-95 group">
-                            <svg class="w-4 h-4 text-brand-400 group-hover:scale-110 transition-transform" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Descargar Plantilla de Ejemplo (.xlsx)
-                        </button>
-                    </div>
 
-                    <!-- Drop Zone -->
-                    <div id="dropZone"
-                        class="border-2 border-dashed border-white/10 rounded-2xl p-10 text-center cursor-pointer transition-all hover:border-brand-500/40 hover:bg-brand-500/5 group">
-                        <div class="flex flex-col items-center gap-3">
-                            <div
-                                class="w-14 h-14 rounded-2xl bg-gray-800/80 flex items-center justify-center group-hover:bg-brand-500/10 transition-all">
-                                <svg class="w-7 h-7 text-gray-500 group-hover:text-brand-400 transition-colors"
-                                    fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+
+                    <!-- ── CONTRACT TYPE ── -->
+                    <section class="glass-card rounded-2xl p-5 sm:p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                             </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-300">Arrastra tu archivo aquí</p>
-                                <p class="text-xs text-gray-500 mt-1">o <span
-                                        class="text-brand-400 underline underline-offset-2">haz clic para
-                                        seleccionar</span> · .csv .xlsx</p>
-                            </div>
+                            <h2 class="text-sm font-semibold text-white">Tipo de Contrato</h2>
                         </div>
-                        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden" />
-                    </div>
+                        <select id="contractType"
+                            class="w-full sm:w-80 bg-gray-900/60 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 transition-all appearance-none cursor-pointer select-arrow">
+                            <option value="arriendo">📄 Contrato de Arriendo</option>
+                            <option value="promesa" disabled>🔒 Promesa de Compraventa — Próximamente</option>
+                            <option value="compraventa" disabled>🔒 Contrato de Compraventa — Próximamente</option>
+                            <option value="comodato" disabled>🔒 Contrato de Comodato — Próximamente</option>
+                        </select>
+                    </section>
 
-                    <!-- File Preview -->
-                    <div id="filePreview" class="hidden">
-                        <div
-                            class="flex items-center justify-between bg-gray-900/60 border border-white/5 rounded-xl px-4 py-3">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor"
-                                        stroke-width="2" viewBox="0 0 24 24">
+                    <!-- ── MODE TABS ── -->
+                    <section class="glass-card rounded-2xl overflow-hidden">
+                        <!-- Tab Headers -->
+                        <div class="flex border-b border-white/5">
+                            <button id="tabManual"
+                                class="tab-btn active flex-1 py-3.5 text-sm font-medium text-center transition-all relative"
+                                data-tab="manual">
+                                <span class="flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    Modo Manual
+                                </span>
+                            </button>
+                            <button id="tabBatch"
+                                class="tab-btn flex-1 py-3.5 text-sm font-medium text-center transition-all relative"
+                                data-tab="batch">
+                                <span class="flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    Modo Masivo (Lote)
+                                </span>
+                            </button>
+                        </div>
+
+                        <!-- ═══ MANUAL MODE PANEL ═══ -->
+                        <div id="panelManual" class="tab-panel active p-5 sm:p-6">
+                            <form id="manualForm" class="space-y-6">
+
+                                <!-- Arrendatario -->
+                                <fieldset class="space-y-4">
+                                    <legend
+                                        class="text-xs font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                                        <span class="w-5 h-px bg-emerald-500/50"></span> Datos del Arrendatario
+                                    </legend>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Nombre / Razón
+                                                social</label>
+                                            <input type="text" name="arrendatario_nombre" required
+                                                placeholder="Ej. Consultora ABC SpA" class="input-field" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">RUT</label>
+                                            <input type="text" name="arrendatario_rut" required
+                                                placeholder="Ej. 76.123.456-7" class="input-field" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Representante
+                                                legal (si
+                                                aplica)</label>
+                                            <input type="text" name="representante_nombre"
+                                                placeholder="Ej. Juan Pérez López" class="input-field" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">RUT del
+                                                representante</label>
+                                            <input type="text" name="representante_rut" placeholder="Ej. 12.345.678-9"
+                                                class="input-field" />
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="block text-xs font-medium text-gray-400 mb-1.5">Teléfono</label>
+                                            <input type="text" name="arrendatario_telefono" placeholder="Ej. +569..."
+                                                class="input-field" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
+                                            <input type="email" name="arrendatario_email"
+                                                placeholder="Ej. contacto@empresa.cl" class="input-field" />
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Domicilio del
+                                                Arrendatario</label>
+                                            <input type="text" name="arrendatario_domicilio" required
+                                                placeholder="Ej. Av. Apoquindo 3000, piso 5, Las Condes"
+                                                class="input-field" />
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Propiedad (Edificio Business Center) -->
+                                <fieldset class="space-y-4">
+                                    <legend
+                                        class="text-xs font-semibold text-violet-400 uppercase tracking-wider flex items-center gap-2">
+                                        <span class="w-5 h-px bg-violet-500/50"></span> Propiedad — Edificio Business
+                                        Center
+                                    </legend>
+                                    <div class="space-y-4">
+                                        <!-- Pisos -->
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Piso
+                                                    Oficinas (ej.
+                                                    octavo piso)</label>
+                                                <input type="text" name="piso" required placeholder="Ej. octavo piso"
+                                                    class="input-field" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Ubicación
+                                                    Estacionamientos (ej. cuarto subterráneo)</label>
+                                                <input type="text" name="ubi_estacionamiento" required
+                                                    placeholder="Ej. cuarto subterráneo" class="input-field"
+                                                    value="cuarto subterráneo" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Oficinas Container -->
+                                        <div class="space-y-3">
+                                            <label class="block text-xs font-medium text-gray-400">Oficinas y
+                                                Superficies</label>
+                                            <div id="oficinasContainer" class="space-y-2">
+                                                <div class="office-row flex gap-2 items-center">
+                                                    <input type="text" name="oficina_num" required
+                                                        placeholder="Oficina (ej. 803)" class="input-field flex-1" />
+                                                    <input type="text" name="oficina_m2" required
+                                                        placeholder="M2 (ej. 32,00)" class="input-field w-32" />
+                                                    <button type="button"
+                                                        class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors opacity-0 pointer-events-none">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button type="button" id="btnAddOffice"
+                                                class="text-xs font-medium text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M12 4v16m8-8H4" />
+                                                </svg>
+                                                Agregar otra oficina
+                                            </button>
+                                        </div>
+
+                                        <!-- Estacionamientos Container -->
+                                        <div class="space-y-3">
+                                            <label
+                                                class="block text-xs font-medium text-gray-400">Estacionamientos</label>
+                                            <div id="estacionamientosContainer" class="space-y-2">
+                                                <div class="parking-row flex gap-2 items-center">
+                                                    <input type="text" name="estacionamiento_num"
+                                                        placeholder="N° Estac. (ej. 195)" class="input-field flex-1" />
+                                                    <button type="button"
+                                                        class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors opacity-0 pointer-events-none">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button type="button" id="btnAddParking"
+                                                class="text-xs font-medium text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M12 4v16m8-8H4" />
+                                                </svg>
+                                                Agregar otro estacionamiento
+                                            </button>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Condiciones del Arriendo -->
+                                <fieldset class="space-y-4">
+                                    <legend
+                                        class="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                                        <span class="w-5 h-px bg-amber-500/50"></span> Condiciones del Arriendo
+                                    </legend>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Fecha del
+                                                contrato</label>
+                                            <input type="text" name="fecha_contrato" required
+                                                placeholder="Ej. 01 Septiembre de 2025" class="input-field" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Plazo
+                                                (meses)</label>
+                                            <input type="number" name="plazo_meses" required placeholder="Ej. 12"
+                                                min="1" class="input-field" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Renta mensual
+                                                (UF)</label>
+                                            <input type="text" name="monto_renta_uf" required placeholder="Ej. 28"
+                                                class="input-field" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Garantía
+                                                (UF)</label>
+                                            <input type="text" name="monto_garantia_uf" required placeholder="Ej. 28"
+                                                class="input-field" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Multa por
+                                                atraso
+                                                (%)</label>
+                                            <input type="text" name="porcentaje_multa_atraso" placeholder="Ej. 5"
+                                                class="input-field" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Días de aviso
+                                                para
+                                                término</label>
+                                            <input type="number" name="dias_aviso" placeholder="Ej. 60" min="1"
+                                                class="input-field" />
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+
+
+                                <!-- Submit -->
+                                <button type="submit" id="btnGenerar"
+                                    class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-violet-600 hover:from-brand-500 hover:to-violet-500 text-white font-semibold rounded-xl transition-all hover:shadow-xl hover:shadow-brand-500/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
+                                    Generar Contrato
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- ═══ BATCH MODE PANEL ═══ -->
+                        <div id="panelBatch" class="tab-panel p-5 sm:p-6 hidden">
+                            <div class="space-y-5">
+                                <!-- Instructions -->
+                                <div class="bg-brand-500/5 border border-brand-500/10 rounded-xl p-4">
+                                    <h3 class="text-sm font-semibold text-brand-300 mb-2">📋 Formato requerido del
+                                        archivo</h3>
+                                    <p class="text-xs text-gray-400 leading-relaxed mb-3">
+                                        Sube un archivo <strong class="text-white">.csv</strong> o <strong
+                                            class="text-white">.xlsx</strong> con las siguientes columnas (los nombres
+                                        deben ser
+                                        exactos):
+                                    </p>
+                                    <div class="overflow-x-auto">
+                                        <table class="text-xs text-gray-400 w-full">
+                                            <thead>
+                                                <tr class="border-b border-white/5">
+                                                    <th class="text-left py-1.5 px-2 text-brand-300 font-medium">Columna
+                                                    </th>
+                                                    <th class="text-left py-1.5 px-2 text-brand-300 font-medium">Ejemplo
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-white/5">
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">arrendatario_nombre
+                                                    </td>
+                                                    <td class="py-1 px-2">Inversiones San Juan SpA</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">arrendatario_rut
+                                                    </td>
+                                                    <td class="py-1 px-2">76.123.456-7</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">
+                                                        arrendatario_domicilio</td>
+                                                    <td class="py-1 px-2">Av. Providencia 1234, Of. 501, Providencia
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">
+                                                        arrendatario_telefono</td>
+                                                    <td class="py-1 px-2">+569 1234 5678</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">arrendatario_email
+                                                    </td>
+                                                    <td class="py-1 px-2">contacto@empresa.cl</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">representante_nombre
+                                                    </td>
+                                                    <td class="py-1 px-2">Juan Pérez Rodríguez</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">representante_rut
+                                                    </td>
+                                                    <td class="py-1 px-2">12.345.678-9</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">piso</td>
+                                                    <td class="py-1 px-2">octavo piso</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">ubi_estacionamiento
+                                                    </td>
+                                                    <td class="py-1 px-2">cuarto subterráneo</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">oficinas</td>
+                                                    <td class="py-1 px-2">802 y 803</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">superficie</td>
+                                                    <td class="py-1 px-2">32,00 y 20,81</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">estacionamientos
+                                                    </td>
+                                                    <td class="py-1 px-2">195 y 196</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">fecha_contrato</td>
+                                                    <td class="py-1 px-2">01 Marzo de 2026</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">plazo_meses</td>
+                                                    <td class="py-1 px-2">12</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">monto_renta_uf</td>
+                                                    <td class="py-1 px-2">25.5</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">monto_garantia_uf
+                                                    </td>
+                                                    <td class="py-1 px-2">30</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">
+                                                        porcentaje_multa_atraso</td>
+                                                    <td class="py-1 px-2">5</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">dias_aviso</td>
+                                                    <td class="py-1 px-2">60</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p id="fileName" class="text-sm font-medium text-white">archivo.xlsx</p>
-                                    <p id="fileRows" class="text-xs text-gray-500">3 filas detectadas</p>
+
+                                <!-- Botón Descargar Plantilla -->
+                                <div class="flex justify-end mb-4">
+                                    <button type="button" id="btnDownloadTemplate"
+                                        class="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-semibold text-brand-300 hover:bg-brand-500/10 hover:border-brand-500/30 transition-all active:scale-95 group">
+                                        <svg class="w-4 h-4 text-brand-400 group-hover:scale-110 transition-transform"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        Descargar Plantilla de Ejemplo (.xlsx)
+                                    </button>
+                                </div>
+
+                                <!-- Drop Zone -->
+                                <div id="dropZone"
+                                    class="border-2 border-dashed border-white/10 rounded-2xl p-10 text-center cursor-pointer transition-all hover:border-brand-500/40 hover:bg-brand-500/5 group">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div
+                                            class="w-14 h-14 rounded-2xl bg-gray-800/80 flex items-center justify-center group-hover:bg-brand-500/10 transition-all">
+                                            <svg class="w-7 h-7 text-gray-500 group-hover:text-brand-400 transition-colors"
+                                                fill="none" stroke="currentColor" stroke-width="1.5"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-300">Arrastra tu archivo aquí</p>
+                                            <p class="text-xs text-gray-500 mt-1">o <span
+                                                    class="text-brand-400 underline underline-offset-2">haz clic para
+                                                    seleccionar</span> · .csv .xlsx</p>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden" />
+                                </div>
+
+                                <!-- File Preview -->
+                                <div id="filePreview" class="hidden">
+                                    <div
+                                        class="flex items-center justify-between bg-gray-900/60 border border-white/5 rounded-xl px-4 py-3">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor"
+                                                    stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p id="fileName" class="text-sm font-medium text-white">archivo.xlsx</p>
+                                                <p id="fileRows" class="text-xs text-gray-500">3 filas detectadas</p>
+                                            </div>
+                                        </div>
+                                        <button id="removeFile"
+                                            class="text-gray-500 hover:text-red-400 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Generate Batch Button -->
+                                <button id="btnGenerarLote" disabled
+                                    class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-violet-600 hover:from-brand-500 hover:to-violet-500 text-white font-semibold rounded-xl transition-all hover:shadow-xl hover:shadow-brand-500/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Generar Contratos en Lote
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                </div> <!-- Final de viewGenerar -->
+
+                <!-- ═══════════════ VIEW: ACTUALIZAR INVENTARIO ═══════════════ -->
+                <div id="viewInventario" class="view-content space-y-6 hidden">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-white">Actualizar Estatus</h2>
+                        <p class="text-sm text-gray-500">Sincroniza el inventario de CRM con las plantillas de estatus.
+                        </p>
+                    </div>
+
+                    <section class="glass-card rounded-2xl p-5 sm:p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01" />
+                                </svg>
+                            </div>
+                            <h2 class="text-sm font-semibold text-white">Actualización de Inventario</h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                            <!-- File CRM -->
+                            <div class="space-y-2">
+                                <label class="block text-xs font-medium text-gray-400">Archivo CRM (.xls, .xlsx)</label>
+                                <div class="relative group">
+                                    <input type="file" id="file_crm" name="file_crm" accept=".xls,.xlsx"
+                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                                    <div
+                                        class="input-field flex items-center justify-between group-hover:border-brand-500/40 transition-all">
+                                        <span id="label_crm" class="text-gray-500 truncate mr-2">Seleccionar
+                                            archivo...</span>
+                                        <svg class="w-4 h-4 text-gray-500 group-hover:text-brand-400 shrink-0"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
-                            <button id="removeFile" class="text-gray-500 hover:text-red-400 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+
+                            <!-- File Estatus -->
+                            <div class="space-y-2">
+                                <label class="block text-xs font-medium text-gray-400">Plantilla de Estatus
+                                    (.xlsx)</label>
+                                <div class="relative group">
+                                    <input type="file" id="file_estatus" name="file_estatus" accept=".xlsx"
+                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                                    <div
+                                        class="input-field flex items-center justify-between group-hover:border-brand-500/40 transition-all">
+                                        <span id="label_estatus" class="text-gray-500 truncate mr-2">Seleccionar
+                                            archivo...</span>
+                                        <svg class="w-4 h-4 text-gray-500 group-hover:text-brand-400 shrink-0"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" id="btnActualizarEstatus"
+                            class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl transition-all hover:shadow-xl hover:shadow-emerald-500/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Actualizar Estatus
+                        </button>
+                    </section>
+                </div> <!-- Final de viewInventario -->
+
+                <!-- ── Shared Status Sections ── -->
+                <div class="pt-6 border-t border-white/5 space-y-6">
+                    <section id="progressSection" class="glass-card rounded-2xl p-5 sm:p-6 hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="spinner w-5 h-5 border-2 border-brand-500/30 border-t-brand-400 rounded-full">
+                                </div>
+                                <p id="progressText" class="text-sm font-medium text-gray-300">Procesando...</p>
+                            </div>
+                            <span id="progressPercent" class="text-xs font-mono text-brand-400">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-800/60 rounded-full h-2 overflow-hidden">
+                            <div id="progressBar"
+                                class="h-full bg-gradient-to-r from-brand-500 to-violet-500 rounded-full transition-all duration-500 ease-out"
+                                style="width: 0%"></div>
+                        </div>
+                        <p id="progressDetail" class="text-xs text-gray-500 mt-2"></p>
+                    </section>
+
+                    <section id="resultSection"
+                        class="glass-card rounded-2xl p-5 sm:p-6 hidden border border-emerald-500/10">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2"
                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
-                            </button>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-emerald-300">¡Operación completada!</h3>
+                                <p id="resultDetail" class="text-xs text-gray-500"></p>
+                            </div>
                         </div>
-                    </div>
+                        <div id="downloadButtons" class="flex flex-wrap gap-3"></div>
+                    </section>
 
-                    <!-- Generate Batch Button -->
-                    <button id="btnGenerarLote" disabled
-                        class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-violet-600 hover:from-brand-500 hover:to-violet-500 text-white font-semibold rounded-xl transition-all hover:shadow-xl hover:shadow-brand-500/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        Generar Contratos en Lote
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- ── PROGRESS SECTION ── -->
-        <section id="progressSection" class="glass-card rounded-2xl p-5 sm:p-6 hidden">
-            <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-3">
-                    <div class="spinner w-5 h-5 border-2 border-brand-500/30 border-t-brand-400 rounded-full"></div>
-                    <p id="progressText" class="text-sm font-medium text-gray-300">Generando contrato...</p>
-                </div>
-                <span id="progressPercent" class="text-xs font-mono text-brand-400">0%</span>
-            </div>
-            <div class="w-full bg-gray-800/60 rounded-full h-2 overflow-hidden">
-                <div id="progressBar"
-                    class="h-full bg-gradient-to-r from-brand-500 to-violet-500 rounded-full transition-all duration-500 ease-out"
-                    style="width: 0%"></div>
-            </div>
-            <p id="progressDetail" class="text-xs text-gray-500 mt-2"></p>
-        </section>
-
-        <!-- ── RESULT SECTION ── -->
-        <section id="resultSection" class="glass-card rounded-2xl p-5 sm:p-6 hidden">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-emerald-300">¡Contratos generados exitosamente!</h3>
-                    <p id="resultDetail" class="text-xs text-gray-500"></p>
-                </div>
-            </div>
-            <div id="downloadButtons" class="flex flex-wrap gap-3"></div>
-        </section>
-
-        <!-- ── ERROR SECTION ── -->
-        <section id="errorSection" class="glass-card rounded-2xl p-5 sm:p-6 hidden border border-red-500/20">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-red-300">Error</h3>
-                    <p id="errorText" class="text-xs text-gray-400 mt-1"></p>
-                </div>
-            </div>
-        </section>
-
-        <!-- ── INVENTORY UPDATE SECTION ── -->
-        <section class="glass-card rounded-2xl p-5 sm:p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01" />
-                    </svg>
-                </div>
-                <h2 class="text-sm font-semibold text-white">Actualización de Inventario</h2>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                <!-- File CRM -->
-                <div class="space-y-2">
-                    <label class="block text-xs font-medium text-gray-400">Archivo CRM (.xls, .xlsx)</label>
-                    <div class="relative group">
-                        <input type="file" id="file_crm" name="file_crm" accept=".xls,.xlsx"
-                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                        <div
-                            class="input-field flex items-center justify-between group-hover:border-brand-500/40 transition-all">
-                            <span id="label_crm" class="text-gray-500 truncate mr-2">Seleccionar archivo...</span>
-                            <svg class="w-4 h-4 text-gray-500 group-hover:text-brand-400 shrink-0" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
+                    <section id="errorSection"
+                        class="glass-card rounded-2xl p-5 sm:p-6 hidden border border-red-500/20">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-red-300">Error</h3>
+                                <p id="errorText" class="text-xs text-gray-400 mt-1"></p>
+                            </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- File Estatus -->
-                <div class="space-y-2">
-                    <label class="block text-xs font-medium text-gray-400">Plantilla de Estatus (.xlsx)</label>
-                    <div class="relative group">
-                        <input type="file" id="file_estatus" name="file_estatus" accept=".xlsx"
-                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                        <div
-                            class="input-field flex items-center justify-between group-hover:border-brand-500/40 transition-all">
-                            <span id="label_estatus" class="text-gray-500 truncate mr-2">Seleccionar archivo...</span>
-                            <svg class="w-4 h-4 text-gray-500 group-hover:text-brand-400 shrink-0" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-                        </div>
-                    </div>
+                    </section>
                 </div>
             </div>
-
-            <button type="button" id="btnActualizarEstatus"
-                class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl transition-all hover:shadow-xl hover:shadow-emerald-500/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Actualizar Estatus
-            </button>
-        </section>
-
-    </main>
-
-    <!-- ═══════════════ FOOTER ═══════════════ -->
-    <footer class="border-t border-white/5 mt-12">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p class="text-xs text-gray-600">ContratoAI © 2026 · Sistema Automatizado de Documentos</p>
-            <p class="text-xs text-gray-600">Los contratos generados deben ser revisados por un profesional legal.</p>
-        </div>
-    </footer>
+        </main>
+    </div>
 
     <!-- Scripts -->
     <script src="script.js"></script>
