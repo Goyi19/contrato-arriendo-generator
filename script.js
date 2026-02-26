@@ -688,6 +688,23 @@ function initDynamicRows() {
         DOM.bodegasContainer.appendChild(div);
     });
 
+    // Representantes
+    if (DOM.btnAddRepresentante) {
+        DOM.btnAddRepresentante.addEventListener('click', () => {
+            const div = document.createElement('div');
+            // Adding margin-top via 'mt-2' if it's dynamic
+            div.className = 'rep-row flex flex-col sm:flex-row gap-2 items-start sm:items-center mt-2 p-3 sm:p-0 bg-gray-800/80 sm:bg-transparent rounded-lg border border-white/5 sm:border-transparent';
+            div.innerHTML = `
+                <input type="text" name="representante_nombre" placeholder="Nombre (ej. Juan Pérez)" class="input-field flex-1" />
+                <input type="text" name="representante_rut" placeholder="RUT (ej. 12.345.678-9)" class="input-field w-full sm:w-48" />
+                <button type="button" class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors self-end sm:self-auto">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            `;
+            DOM.representantesContainer.appendChild(div);
+        });
+    }
+
     // Global listener for removals
     document.addEventListener('click', (e) => {
         if (e.target.closest('.remove-row')) {
