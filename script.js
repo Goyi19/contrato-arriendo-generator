@@ -49,6 +49,9 @@ const DOM = {
     bodegasContainer: $('#bodegasContainer'),
     btnAddBodega: $('#btnAddBodega'),
     diaPagoGroup: $('#diaPagoGroup'),
+    // Multiple Reps fields
+    representantesContainer: $('#representantesContainer'),
+    btnAddRepresentante: $('#btnAddRepresentante'),
 };
 
 // ──────────────────────────────────────────────
@@ -271,22 +274,89 @@ function buildContractData(rawData) {
         return `D${rest} y D${last}`;
     };
 
-    // Representante
-    const rep_nombre = rawData.representante_nombre || '';
-    const rep_rut = rawData.representante_rut || '';
+    // Representante Logic
+    let repNames = [];
+    let repRuts = [];
+    if (rawData.representante_nombre) {
+        repNames = Array.isArray(rawData.representante_nombre) ? rawData.representante_nombre : [rawData.representante_nombre];
+        repRuts = Array.isArray(rawData.representante_rut) ? rawData.representante_rut : [rawData.representante_rut];
+    } else {
+        const rNameStr = String(rawData.representante_nombre || '');
+        const rRutStr = String(rawData.representante_rut || '');
+        repNames = rNameStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
+        // Let's assume the same delimiter for Ruts (rarely comma separeted but handled just in case)
+        repRuts = rRutStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
+    }
+
+    repNames = repNames.map(n => String(n).trim()).filter(Boolean);
+    repRuts = repRuts.map(r => String(r).trim()).filter(Boolean);
+
+    const validRepsObj = repNames.map((name, index) => {
+        return {
+            nombre: name,
+            rut: repRuts[index] || ''
+        }
+    });
+
+    const multipleReps = validRepsObj.length > 1;
+    let formatRepsList = '';
+    validRepsObj.forEach((rep, index) => {
+        if (index === 0) {
+            formatRepsList += `don ${rep.nombre}, cédula nacional de identidad número ${rep.rut}`;
+        } else if (index === validRepsObj.length - 1) {
+            formatRepsList += ` y don ${rep.nombre}, cédula nacional de identidad número ${rep.rut}`;
+        } else {
+            formatRepsList += `, don ${rep.nombre}, cédula nacional de identidad número ${rep.rut}`;
+        }
+    });
+
+    // We keep legacy variable for the Arriendo/Bodegas that expect it in the old format
+    // But since the new Locales uses `{reps_lista}` and `{rep_unico}` we provide them too.
+    const rep_nombre = repNames[0] || '';
+    const rep_rut = repRuts[0] || '';
     const arrendatario_representante_texto = rep_nombre ? `, representada por don ${rep_nombre}, cédula nacional de identidad número ${rep_rut}` : "";
+
+
+    // Fiadores Variables (Same logic for naming, used in Locales)
+    let formatFiadoresList = '';
+    validRepsObj.forEach((rep, index) => {
+        if (index === 0) {
+            formatFiadoresList += `don ${rep.nombre}`;
+        } else if (index === validRepsObj.length - 1) {
+            formatFiadoresList += ` y don ${rep.nombre}`;
+        } else {
+            formatFiadoresList += `, don ${rep.nombre}`;
+        }
+    });
+
 
     // Signature Logic
     const rawFirmaNombre = rep_nombre || rawData.arrendatario_nombre || '';
     const rawFirmaRut = rep_rut || rawData.arrendatario_rut || '';
 
+    // Locales specific: detalle renta 
+    const isLocales = DOM.contractType && DOM.contractType.value === 'locales';
+    let detalle_renta_locales = [];
+    if (isLocales && validOfis.length > 0) {
+        // This simulates the table/list structure docxtemplater expects for multiple item replacement blocks if we were to loop over them.
+        // Wait, docxtemplater will loop over '{#detalle_renta_locales} - Local {num}: UF {monto} {/detalle_renta_locales}'.
+        // The previous implementation used a single replaced variable '{detalle_renta_locales}' containing line breaks. Let's do that for now.
+        validOfis.forEach((num, index) => {
+            detalle_renta_locales.push(`\t\t\t\t- Local N° ${num}: la suma equivalente en pesos a ${rawData.monto_renta_uf} Unidades de Fomento mensuales.`);
+        });
+    }
+
     // Result object
     return {
         // Sections & Grammar
         multiple_ofis: validOfis.length > 1,
+        multiple_locales: validOfis.length > 1, // Synonym for locales
         oficinas_lista: formatList(validOfis),
+        locales_lista: formatList(validOfis), // Synonym for locales
         oficina_unica: validOfis[0] || '',
+        local_unico: validOfis[0] || '', // Synonym for locales
         parentesis_plural: validOfis.length === 2 ? 'ambas oficinas' : 'todas estas oficinas',
+        nivel_local: rawData.piso ? `en su ${rawData.piso},` : '',
 
         tiene_estac: validEstacs.length > 0,
         multiple_estac: validEstacs.length > 1,
@@ -305,13 +375,31 @@ function buildContractData(rawData) {
         nivel_bodega: rawData.nivel_bodega || '',
         dia_pago: rawData.dia_pago || '',
 
+        // Locales Specific
+        detalle_renta_locales: detalle_renta_locales.length > 0 ? detalle_renta_locales.join('\n') : '',
+
         // Basic Info
         fecha_contrato: rawData.fecha_contrato || '',
         arrendatario_nombre: rawData.arrendatario_nombre || '',
         arrendatario_rut: rawData.arrendatario_rut || '',
+
+        // Reps Legacy
         arrendatario_representante_texto,
         representante_nombre: rep_nombre,
         representante_rut: rep_rut,
+
+        // Reps Multiple (New)
+        multiple_reps: multipleReps,
+        reps_lista: formatRepsList,
+        rep_unico: formatRepsList, // same string just grammar changes in word "representados" vs "representado" 
+        fiadores_lista_completa: formatFiadoresList,
+        fiador_unico_completo: formatFiadoresList,
+
+        rep_1_nombre: validRepsObj[0] ? validRepsObj[0].nombre : rawFirmaNombre,
+        rep_1_rut: validRepsObj[0] ? validRepsObj[0].rut : rawFirmaRut,
+        rep_2_nombre: validRepsObj[1] ? validRepsObj[1].nombre : '',
+        rep_2_rut: validRepsObj[1] ? validRepsObj[1].rut : '',
+
         arrendatario_domicilio: rawData.arrendatario_domicilio || '',
         piso: piso,
 
@@ -324,7 +412,7 @@ function buildContractData(rawData) {
         arrendatario_telefono: Array.isArray(rawData.arrendatario_telefono) ? Array.from(new Set(rawData.arrendatario_telefono.map(v => String(v).trim()).filter(Boolean)))[0] || '' : String(rawData.arrendatario_telefono || '').trim(),
         arrendatario_email: (Array.isArray(rawData.arrendatario_email) ? Array.from(new Set(rawData.arrendatario_email.map(v => String(v).trim()).filter(Boolean)))[0] || '' : String(rawData.arrendatario_email || '').trim()) + '\n', // Fix Bug 1
 
-        // Signature fields
+        // Signature fields (Legacy)
         firma_nombre: rawFirmaNombre + '\n', // Fix Bug 1
         firma_rut: rawFirmaRut,
         firma_empresa: rep_nombre ? `pp. ${rawData.arrendatario_nombre}` : ''

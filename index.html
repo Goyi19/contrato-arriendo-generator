@@ -151,6 +151,7 @@
                             class="w-full sm:w-80 bg-gray-900/60 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 transition-all appearance-none cursor-pointer select-arrow">
                             <option value="arriendo">📄 Contrato de Arriendo Cienfuegos (Oficina)</option>
                             <option value="bodegas">🏬 Contrato de Bodegas (Isabel la Catolica)</option>
+                            <option value="locales">🏪 Contrato de Locales Comerciales (Isabel la Catolica)</option>
                             <option value="promesa" disabled>🔒 Promesa de Compraventa — Próximamente</option>
                             <option value="compraventa" disabled>🔒 Contrato de Compraventa — Próximamente</option>
                             <option value="comodato" disabled>🔒 Contrato de Comodato — Próximamente</option>
@@ -209,18 +210,39 @@
                                             <input type="text" name="arrendatario_rut" required
                                                 placeholder="Ej. 76.123.456-7" class="input-field" />
                                         </div>
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Representante
-                                                legal (si
-                                                aplica)</label>
-                                            <input type="text" name="representante_nombre"
-                                                placeholder="Ej. Juan Pérez López" class="input-field" />
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">RUT del
-                                                representante</label>
-                                            <input type="text" name="representante_rut" placeholder="Ej. 12.345.678-9"
-                                                class="input-field" />
+
+                                        <!-- Representantes Multiples Container -->
+                                        <div id="representantesContainerWrapper" class="sm:col-span-2 space-y-3">
+                                            <label class="block text-xs font-medium text-gray-400">Representante(s)
+                                                Legal(es) (si aplica)</label>
+                                            <div id="representantesContainer" class="space-y-2">
+                                                <div
+                                                    class="rep-row flex flex-col sm:flex-row gap-2 items-start sm:items-center p-3 sm:p-0 bg-gray-800/80 sm:bg-transparent rounded-lg border border-white/5 sm:border-transparent">
+                                                    <input type="text" name="representante_nombre"
+                                                        placeholder="Nombre (ej. Juan Pérez)"
+                                                        class="input-field flex-1" />
+                                                    <input type="text" name="representante_rut"
+                                                        placeholder="RUT (ej. 12.345.678-9)"
+                                                        class="input-field w-full sm:w-48" />
+                                                    <button type="button"
+                                                        class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors opacity-0 pointer-events-none self-end sm:self-auto">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button type="button" id="btnAddRepresentante"
+                                                class="text-xs font-medium text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M12 4v16m8-8H4" />
+                                                </svg>
+                                                Agregar otro representante
+                                            </button>
                                         </div>
                                         <div>
                                             <label
