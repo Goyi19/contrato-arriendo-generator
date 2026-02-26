@@ -643,6 +643,9 @@ function init() {
 
     // Contract type change (show alert for disabled types and toggle fields)
     DOM.contractType.addEventListener('change', (e) => {
+        const arriendoFields = $$('input[name="piso"], input[name="ubi_estacionamiento"], input[name="oficina_num"], input[name="oficina_m2"]');
+        const bodegasFields = $$('input[name="bodega_num"], input[name="nivel_bodega"]');
+
         if (e.target.value === 'arriendo') {
             DOM.oficinasInfoAdicional.classList.remove('hidden');
             DOM.oficinasContainerWrapper.classList.remove('hidden');
@@ -650,6 +653,8 @@ function init() {
             DOM.multaGroup.classList.remove('hidden');
             DOM.bodegasGroup.classList.add('hidden');
             DOM.diaPagoGroup.classList.add('hidden');
+            arriendoFields.forEach(f => f.required = true);
+            bodegasFields.forEach(f => f.required = false);
         } else if (e.target.value === 'bodegas') {
             DOM.oficinasInfoAdicional.classList.add('hidden');
             DOM.oficinasContainerWrapper.classList.add('hidden');
@@ -657,11 +662,16 @@ function init() {
             DOM.multaGroup.classList.add('hidden');
             DOM.bodegasGroup.classList.remove('hidden');
             DOM.diaPagoGroup.classList.remove('hidden');
+            arriendoFields.forEach(f => f.required = false);
+            bodegasFields.forEach(f => f.required = true);
         } else {
             // Disabled types fallback to arriendo
             e.target.value = 'arriendo';
         }
     });
+
+    // Trigger initially to set required attributes correctly
+    DOM.contractType.dispatchEvent(new Event('change'));
 
     // Template download
     DOM.btnDownloadTemplate.addEventListener('click', downloadExcelTemplate);
