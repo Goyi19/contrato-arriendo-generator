@@ -121,7 +121,13 @@ async function generateDocx(templateData, fileName, baseBuffer = null) {
 
     // 1. Cargar la plantilla original (solo si no se pasó un buffer)
     if (!arrayBuffer) {
-        const templateFile = DOM.contractType.value === 'bodegas' ? 'template_bodegas_isabel_la_catolica.docx' : 'template.docx';
+        let templateFile = 'template.docx';
+        if (DOM.contractType.value === 'bodegas') {
+            templateFile = 'template_bodegas_isabel_la_catolica.docx';
+        } else if (DOM.contractType.value === 'locales') {
+            templateFile = 'template_local_isabel_la_catolica.docx';
+        }
+
         const response = await fetch(templateFile);
         if (!response.ok) {
             throw new Error(`No se pudo cargar la plantilla base (${templateFile}).`);
@@ -548,7 +554,13 @@ async function handleBatchGenerate() {
 
     try {
         // OPTIMIZACIÓN: Cargar la plantilla una sola vez para todo el lote
-        const templateFile = DOM.contractType.value === 'bodegas' ? 'template_bodegas_isabel_la_catolica.docx' : 'template.docx';
+        let templateFile = 'template.docx';
+        if (DOM.contractType.value === 'bodegas') {
+            templateFile = 'template_bodegas_isabel_la_catolica.docx';
+        } else if (DOM.contractType.value === 'locales') {
+            templateFile = 'template_local_isabel_la_catolica.docx';
+        }
+
         const response = await fetch(templateFile);
         if (!response.ok) throw new Error(`No se pudo cargar la plantilla base (${templateFile}).`);
         const baseBuffer = await response.arrayBuffer();
@@ -650,10 +662,12 @@ function initDragAndDrop() {
 function initDynamicRows() {
     // Offices
     DOM.btnAddOffice.addEventListener('click', () => {
+        const isLocales = DOM.contractType && DOM.contractType.value === 'locales';
+        const placeholderText = isLocales ? "Local (ej. 101)" : "Oficina (ej. 802)";
         const div = document.createElement('div');
         div.className = 'flex gap-2 items-center';
         div.innerHTML = `
-            <input type="text" name="oficina_num" required placeholder="Oficina (ej. 802)" class="input-field flex-1" />
+            <input type="text" name="oficina_num" required placeholder="${placeholderText}" class="input-field flex-1" />
             <input type="text" name="oficina_m2" required placeholder="M2 (ej. 20,81)" class="input-field w-32" />
             <button type="button" class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -764,6 +778,11 @@ function init() {
             DOM.diaPagoGroup.classList.add('hidden');
             arriendoFields.forEach(f => f.required = true);
             bodegasFields.forEach(f => f.required = false);
+
+            // Revert placeholders and button text for oficinas
+            $$('input[name="oficina_num"]').forEach(f => f.placeholder = "Oficina (ej. 803)");
+            if (DOM.btnAddOffice) DOM.btnAddOffice.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg> Agregar otra oficina';
+
         } else if (e.target.value === 'bodegas') {
             DOM.oficinasInfoAdicional.classList.add('hidden');
             DOM.oficinasContainerWrapper.classList.add('hidden');
@@ -784,6 +803,11 @@ function init() {
             arriendoFields.forEach(f => f.required = false); // some are false
             $$('input[name="oficina_num"], input[name="oficina_m2"]').forEach(f => f.required = true);
             bodegasFields.forEach(f => f.required = false);
+
+            // Adjust placeholders and button text for locales
+            $$('input[name="oficina_num"]').forEach(f => f.placeholder = "Local (ej. 101)");
+            if (DOM.btnAddOffice) DOM.btnAddOffice.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg> Agregar otro local';
+
         } else {
             // Disabled types fallback to arriendo
             e.target.value = 'arriendo';
