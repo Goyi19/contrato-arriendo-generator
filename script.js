@@ -40,6 +40,15 @@ const DOM = {
     estacionamientosContainer: $('#estacionamientosContainer'),
     btnAddParking: $('#btnAddParking'),
     btnDownloadTemplate: $('#btnDownloadTemplate'),
+    // Bodegas fields
+    oficinasInfoAdicional: $('#oficinasInfoAdicional'),
+    oficinasContainerWrapper: $('#oficinasContainerWrapper'),
+    estacionamientosContainerWrapper: $('#estacionamientosContainerWrapper'),
+    multaGroup: $('#multaGroup'),
+    bodegasGroup: $('#bodegasGroup'),
+    bodegasContainer: $('#bodegasContainer'),
+    btnAddBodega: $('#btnAddBodega'),
+    diaPagoGroup: $('#diaPagoGroup'),
 };
 
 // ──────────────────────────────────────────────
@@ -109,9 +118,10 @@ async function generateDocx(templateData, fileName, baseBuffer = null) {
 
     // 1. Cargar la plantilla original (solo si no se pasó un buffer)
     if (!arrayBuffer) {
-        const response = await fetch('template.docx');
+        const templateFile = DOM.contractType.value === 'bodegas' ? 'template_bodegas_isabel_la_catolica.docx' : 'template.docx';
+        const response = await fetch(templateFile);
         if (!response.ok) {
-            throw new Error('No se pudo cargar la plantilla base (template.docx).');
+            throw new Error(`No se pudo cargar la plantilla base (${templateFile}).`);
         }
         arrayBuffer = await response.arrayBuffer();
     }
@@ -230,6 +240,16 @@ function buildContractData(rawData) {
     const validSup = Array.from(new Set(superficies.map(s => String(s).trim()).filter(Boolean)));
     const validEstacs = Array.from(new Set(estacs.map(e => String(e).trim()).filter(Boolean)));
 
+    // For Bodegas
+    let bodegas = [];
+    if (rawData.bodega_num) {
+        bodegas = Array.isArray(rawData.bodega_num) ? rawData.bodega_num : [rawData.bodega_num];
+    } else {
+        const bodStr = String(rawData.bodegas || '');
+        bodegas = bodStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
+    }
+    const validBodegas = Array.from(new Set(bodegas.map(b => String(b).trim()).filter(Boolean)));
+
     const piso = rawData.piso || '';
     const ubiEstac = rawData.ubi_estacionamiento || 'cuarto subterráneo';
 
@@ -277,6 +297,13 @@ function buildContractData(rawData) {
         sup_lista: formatList(validSup),
         sup_unica: validSup[0] || '',
         oficinas_lista_d: formatListD(validOfis) + ' ', // Fix Bug 2 (plural)
+
+        // Bodegas Grammar
+        multiple_bodegas: validBodegas.length > 1,
+        bodegas_lista: formatList(validBodegas),
+        bodegas_unica: validBodegas[0] || '',
+        nivel_bodega: rawData.nivel_bodega || '',
+        dia_pago: rawData.dia_pago || '',
 
         // Basic Info
         fecha_contrato: rawData.fecha_contrato || '',
@@ -430,8 +457,9 @@ async function handleBatchGenerate() {
 
     try {
         // OPTIMIZACIÓN: Cargar la plantilla una sola vez para todo el lote
-        const response = await fetch('template.docx');
-        if (!response.ok) throw new Error('No se pudo cargar la plantilla base.');
+        const templateFile = DOM.contractType.value === 'bodegas' ? 'template_bodegas_isabel_la_catolica.docx' : 'template.docx';
+        const response = await fetch(templateFile);
+        if (!response.ok) throw new Error(`No se pudo cargar la plantilla base (${templateFile}).`);
         const baseBuffer = await response.arrayBuffer();
 
         for (let i = 0; i < total; i++) {
@@ -556,6 +584,19 @@ function initDynamicRows() {
         DOM.estacionamientosContainer.appendChild(div);
     });
 
+    // Bodegas
+    DOM.btnAddBodega.addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = 'bodega-row flex gap-2 items-center';
+        div.innerHTML = `
+            <input type="text" name="bodega_num" placeholder="Bodega (ej. 39)" class="input-field flex-1" />
+            <button type="button" class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        `;
+        DOM.bodegasContainer.appendChild(div);
+    });
+
     // Global listener for removals
     document.addEventListener('click', (e) => {
         if (e.target.closest('.remove-row')) {
@@ -600,9 +641,24 @@ function init() {
     // Init Scraping / Analisis Territorial
     initScrapingEvents();
 
-    // Contract type change (show alert for disabled types)
+    // Contract type change (show alert for disabled types and toggle fields)
     DOM.contractType.addEventListener('change', (e) => {
-        if (e.target.value !== 'arriendo') {
+        if (e.target.value === 'arriendo') {
+            DOM.oficinasInfoAdicional.classList.remove('hidden');
+            DOM.oficinasContainerWrapper.classList.remove('hidden');
+            DOM.estacionamientosContainerWrapper.classList.remove('hidden');
+            DOM.multaGroup.classList.remove('hidden');
+            DOM.bodegasGroup.classList.add('hidden');
+            DOM.diaPagoGroup.classList.add('hidden');
+        } else if (e.target.value === 'bodegas') {
+            DOM.oficinasInfoAdicional.classList.add('hidden');
+            DOM.oficinasContainerWrapper.classList.add('hidden');
+            DOM.estacionamientosContainerWrapper.classList.add('hidden');
+            DOM.multaGroup.classList.add('hidden');
+            DOM.bodegasGroup.classList.remove('hidden');
+            DOM.diaPagoGroup.classList.remove('hidden');
+        } else {
+            // Disabled types fallback to arriendo
             e.target.value = 'arriendo';
         }
     });
@@ -674,36 +730,62 @@ async function handleInventoryUpdate() {
 // TEMPLATE DOWNLOAD LOGIC
 // ──────────────────────────────────────────────
 function downloadExcelTemplate() {
-    // Definimos los encabezados exactos que tu script espera
-    const headers = [
-        "arrendatario_nombre", "arrendatario_rut", "arrendatario_domicilio",
-        "arrendatario_telefono", "arrendatario_email", "representante_nombre",
-        "representante_rut", "piso", "ubi_estacionamiento", "oficinas",
-        "superficie", "estacionamientos", "fecha_contrato", "plazo_meses",
-        "monto_renta_uf", "monto_garantia_uf", "porcentaje_multa_atraso", "dias_aviso"
-    ];
+    let headers = [];
+    let exampleRow = {};
 
-    // Fila de ejemplo con formato real
-    const exampleRow = {
-        "arrendatario_nombre": "Inversiones San Juan SpA",
-        "arrendatario_rut": "76.123.456-7",
-        "arrendatario_domicilio": "Av. Providencia 1234, Of. 501, Providencia",
-        "arrendatario_telefono": "+569 1234 5678",
-        "arrendatario_email": "contacto@empresa.cl",
-        "representante_nombre": "Juan Pérez Rodríguez",
-        "representante_rut": "12.345.678-9",
-        "piso": "octavo piso",
-        "ubi_estacionamiento": "cuarto subterráneo",
-        "oficinas": "802 y 803",
-        "superficie": "32,00 y 20,81",
-        "estacionamientos": "195 y 196",
-        "fecha_contrato": "01 Marzo de 2026",
-        "plazo_meses": 12,
-        "monto_renta_uf": 25.5,
-        "monto_garantia_uf": 30,
-        "porcentaje_multa_atraso": 5,
-        "dias_aviso": 60
-    };
+    if (DOM.contractType.value === 'bodegas') {
+        headers = [
+            "fecha_contrato", "arrendatario_nombre", "arrendatario_rut", "arrendatario_domicilio",
+            "representante_nombre", "representante_rut", "arrendatario_email", "arrendatario_telefono",
+            "plazo_meses", "dias_aviso", "monto_renta_uf", "monto_garantia_uf",
+            "bodegas", "nivel_bodega", "dia_pago"
+        ];
+        exampleRow = {
+            "fecha_contrato": "01 Marzo de 2026",
+            "arrendatario_nombre": "Inversiones San Juan SpA",
+            "arrendatario_rut": "76.123.456-7",
+            "arrendatario_domicilio": "Av. Providencia 1234, Of. 501, Providencia",
+            "representante_nombre": "Juan Pérez Rodríguez",
+            "representante_rut": "12.345.678-9",
+            "arrendatario_email": "contacto@empresa.cl",
+            "arrendatario_telefono": "+569 1234 5678",
+            "plazo_meses": 12,
+            "dias_aviso": 60,
+            "monto_renta_uf": 25.5,
+            "monto_garantia_uf": 30,
+            "bodegas": "39 y 40",
+            "nivel_bodega": "-3 subterráneo",
+            "dia_pago": 5
+        };
+    } else {
+        headers = [
+            "arrendatario_nombre", "arrendatario_rut", "arrendatario_domicilio",
+            "arrendatario_telefono", "arrendatario_email", "representante_nombre",
+            "representante_rut", "piso", "ubi_estacionamiento", "oficinas",
+            "superficie", "estacionamientos", "fecha_contrato", "plazo_meses",
+            "monto_renta_uf", "monto_garantia_uf", "porcentaje_multa_atraso", "dias_aviso"
+        ];
+        exampleRow = {
+            "arrendatario_nombre": "Inversiones San Juan SpA",
+            "arrendatario_rut": "76.123.456-7",
+            "arrendatario_domicilio": "Av. Providencia 1234, Of. 501, Providencia",
+            "arrendatario_telefono": "+569 1234 5678",
+            "arrendatario_email": "contacto@empresa.cl",
+            "representante_nombre": "Juan Pérez Rodríguez",
+            "representante_rut": "12.345.678-9",
+            "piso": "octavo piso",
+            "ubi_estacionamiento": "cuarto subterráneo",
+            "oficinas": "802 y 803",
+            "superficie": "32,00 y 20,81",
+            "estacionamientos": "195 y 196",
+            "fecha_contrato": "01 Marzo de 2026",
+            "plazo_meses": 12,
+            "monto_renta_uf": 25.5,
+            "monto_garantia_uf": 30,
+            "porcentaje_multa_atraso": 5,
+            "dias_aviso": 60
+        };
+    }
 
     // Crear el libro de trabajo usando SheetJS (XLSX)
     const worksheet = XLSX.utils.json_to_sheet([exampleRow], { header: headers });
