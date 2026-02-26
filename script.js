@@ -457,7 +457,10 @@ async function handleManualGenerate(e) {
         showProgress('¡Listo!', 100, '');
 
         const safeName = (templateData.arrendatario_nombre || 'contrato').replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, '').replace(/\s+/g, '_');
-        const downloadFileName = `Contrato_Arriendo_${safeName}.docx`;
+        let typePrefix = "Arriendo";
+        if (DOM.contractType.value === 'bodegas') typePrefix = "Bodegas";
+        if (DOM.contractType.value === 'locales') typePrefix = "Locales";
+        const downloadFileName = `Contrato_${typePrefix}_${safeName}.docx`;
 
         showResult(`Contrato generado exitosamente`, [{
             label: `Descargar ${downloadFileName}`,
@@ -737,6 +740,7 @@ function init() {
         if (e.target.value === 'arriendo') {
             DOM.oficinasInfoAdicional.classList.remove('hidden');
             DOM.oficinasContainerWrapper.classList.remove('hidden');
+            DOM.oficinasContainerWrapper.querySelector('label').textContent = 'Oficinas y Superficies';
             DOM.estacionamientosContainerWrapper.classList.remove('hidden');
             DOM.multaGroup.classList.remove('hidden');
             DOM.bodegasGroup.classList.add('hidden');
@@ -752,6 +756,17 @@ function init() {
             DOM.diaPagoGroup.classList.remove('hidden');
             arriendoFields.forEach(f => f.required = false);
             bodegasFields.forEach(f => f.required = true);
+        } else if (e.target.value === 'locales') {
+            DOM.oficinasInfoAdicional.classList.add('hidden');
+            DOM.oficinasContainerWrapper.classList.remove('hidden');
+            DOM.oficinasContainerWrapper.querySelector('label').textContent = 'Locales y Superficies (M2)';
+            DOM.estacionamientosContainerWrapper.classList.add('hidden');
+            DOM.multaGroup.classList.remove('hidden');
+            DOM.bodegasGroup.classList.add('hidden');
+            DOM.diaPagoGroup.classList.add('hidden');
+            arriendoFields.forEach(f => f.required = false); // some are false
+            $$('input[name="oficina_num"], input[name="oficina_m2"]').forEach(f => f.required = true);
+            bodegasFields.forEach(f => f.required = false);
         } else {
             // Disabled types fallback to arriendo
             e.target.value = 'arriendo';
