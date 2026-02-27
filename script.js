@@ -226,21 +226,25 @@ function buildContractData(rawData) {
     let oficinas = [];
     let superficies = [];
     let estacs = [];
+    let rentasLocales = [];
 
     if (rawData.oficina_num) {
         // From dynamic manual form
         oficinas = Array.isArray(rawData.oficina_num) ? rawData.oficina_num : [rawData.oficina_num];
         superficies = Array.isArray(rawData.oficina_m2) ? rawData.oficina_m2 : [rawData.oficina_m2];
         estacs = Array.isArray(rawData.estacionamiento_num) ? rawData.estacionamiento_num : [rawData.estacionamiento_num];
+        rentasLocales = Array.isArray(rawData.renta_local_uf) ? rawData.renta_local_uf : [rawData.renta_local_uf];
     } else {
         // From bread/batch mode (CSV usually has strings)
         const ofisStr = String(rawData.oficinas || '');
         const supStr = String(rawData.superficie || '');
         const estStr = String(rawData.estacionamientos || '');
+        const rentasStr = String(rawData.rentas_locales_uf || rawData.renta_local_uf || '');
 
         oficinas = ofisStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
         superficies = supStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
         estacs = estStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
+        rentasLocales = rentasStr.split(/[y,]/).map(s => s.trim()).filter(Boolean);
     }
 
     // Filter and trim first
@@ -248,6 +252,8 @@ function buildContractData(rawData) {
     const validOfis = Array.from(new Set(oficinas.map(o => String(o).trim()).filter(Boolean)));
     const validSup = Array.from(new Set(superficies.map(s => String(s).trim()).filter(Boolean)));
     const validEstacs = Array.from(new Set(estacs.map(e => String(e).trim()).filter(Boolean)));
+    // Map rental amounts positionally
+    const validRentasLocales = validOfis.map((_, i) => (rentasLocales[i] ? String(rentasLocales[i]).trim() : String(rawData.monto_renta_uf || '').trim()));
 
     // For Bodegas
     let bodegas = [];
@@ -348,7 +354,8 @@ function buildContractData(rawData) {
         // Wait, docxtemplater will loop over '{#detalle_renta_locales} - Local {num}: UF {monto} {/detalle_renta_locales}'.
         // The previous implementation used a single replaced variable '{detalle_renta_locales}' containing line breaks. Let's do that for now.
         validOfis.forEach((num, index) => {
-            detalle_renta_locales.push(`\t\t\t\t- Local N° ${num}: la suma equivalente en pesos a ${rawData.monto_renta_uf} Unidades de Fomento mensuales.`);
+            const montoUF = validRentasLocales[index] || rawData.monto_renta_uf;
+            detalle_renta_locales.push(`\t\t\t\t- Local N° ${num}: la suma equivalente en pesos a ${montoUF} Unidades de Fomento mensuales.`);
         });
     }
 
@@ -411,6 +418,7 @@ function buildContractData(rawData) {
 
         plazo_meses: rawData.plazo_meses || '',
         dias_aviso: rawData.dias_aviso || '',
+        fecha_termino_anticipado: rawData.fecha_termino_anticipado || '',
         monto_renta_uf: rawData.monto_renta_uf || '',
         monto_garantia_uf: rawData.monto_garantia_uf || '',
         porcentaje_multa_atraso: rawData.porcentaje_multa_atraso || '',
@@ -668,7 +676,8 @@ function initDynamicRows() {
         div.className = 'flex gap-2 items-center';
         div.innerHTML = `
             <input type="text" name="oficina_num" required placeholder="${placeholderText}" class="input-field flex-1" />
-            <input type="text" name="oficina_m2" required placeholder="M2 (ej. 20,81)" class="input-field w-32" />
+            <input type="text" name="oficina_m2" required placeholder="M2 (ej. 20,81)" class="input-field w-24" />
+            <input type="text" name="renta_local_uf" placeholder="UF (ej. 28)" class="input-field w-24" />
             <button type="button" class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>

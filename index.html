@@ -338,7 +338,9 @@
                                                     <input type="text" name="oficina_num" required
                                                         placeholder="Oficina (ej. 803)" class="input-field flex-1" />
                                                     <input type="text" name="oficina_m2" required
-                                                        placeholder="M2 (ej. 32,00)" class="input-field w-32" />
+                                                        placeholder="M2 (ej. 32,00)" class="input-field w-24" />
+                                                    <input type="text" name="renta_local_uf" placeholder="UF (ej. 28)"
+                                                        class="input-field w-24" />
                                                     <button type="button"
                                                         class="remove-row p-2 text-gray-500 hover:text-red-400 transition-colors opacity-0 pointer-events-none">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -435,6 +437,12 @@
                                                 término</label>
                                             <input type="number" name="dias_aviso" placeholder="Ej. 60" min="1"
                                                 class="input-field" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Fecha término
+                                                anticipado</label>
+                                            <input type="text" name="fecha_termino_anticipado"
+                                                placeholder="Ej. 01 Septiembre de 2026" class="input-field" />
                                         </div>
                                         <div id="diaPagoGroup" class="hidden">
                                             <label class="block text-xs font-medium text-gray-400 mb-1.5">Día de pago
@@ -567,6 +575,16 @@
                                                 <tr>
                                                     <td class="py-1 px-2 font-mono text-violet-300">dias_aviso</td>
                                                     <td class="py-1 px-2">60</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">
+                                                        fecha_termino_anticipado</td>
+                                                    <td class="py-1 px-2">01 Septiembre de 2026</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-1 px-2 font-mono text-violet-300">rentas_locales_uf
+                                                    </td>
+                                                    <td class="py-1 px-2">30 y 45</td>
                                                 </tr>
                                             </tbody>
                                         </table>
