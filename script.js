@@ -45,6 +45,7 @@ const DOM = {
     oficinasContainerWrapper: $('#oficinasContainerWrapper'),
     estacionamientosContainerWrapper: $('#estacionamientosContainerWrapper'),
     multaGroup: $('#multaGroup'),
+    rentaMensualGroup: $('#rentaMensualGroup'),
     bodegasGroup: $('#bodegasGroup'),
     bodegasContainer: $('#bodegasContainer'),
     btnAddBodega: $('#btnAddBodega'),
@@ -785,6 +786,11 @@ function init() {
             DOM.multaGroup.classList.remove('hidden');
             DOM.bodegasGroup.classList.add('hidden');
             DOM.diaPagoGroup.classList.add('hidden');
+            if (DOM.rentaMensualGroup) {
+                DOM.rentaMensualGroup.classList.remove('hidden');
+                const rentInput = DOM.rentaMensualGroup.querySelector('input');
+                if (rentInput) rentInput.required = true;
+            }
             arriendoFields.forEach(f => f.required = true);
             bodegasFields.forEach(f => f.required = false);
 
@@ -799,6 +805,11 @@ function init() {
             DOM.multaGroup.classList.add('hidden');
             DOM.bodegasGroup.classList.remove('hidden');
             DOM.diaPagoGroup.classList.remove('hidden');
+            if (DOM.rentaMensualGroup) {
+                DOM.rentaMensualGroup.classList.remove('hidden');
+                const rentInput = DOM.rentaMensualGroup.querySelector('input');
+                if (rentInput) rentInput.required = true;
+            }
             arriendoFields.forEach(f => f.required = false);
             bodegasFields.forEach(f => f.required = true);
         } else if (e.target.value === 'locales') {
@@ -809,6 +820,11 @@ function init() {
             DOM.multaGroup.classList.remove('hidden');
             DOM.bodegasGroup.classList.add('hidden');
             DOM.diaPagoGroup.classList.add('hidden');
+            if (DOM.rentaMensualGroup) {
+                DOM.rentaMensualGroup.classList.add('hidden');
+                const rentInput = DOM.rentaMensualGroup.querySelector('input');
+                if (rentInput) rentInput.required = false;
+            }
             arriendoFields.forEach(f => f.required = false); // some are false
             $$('input[name="oficina_num"], input[name="oficina_m2"]').forEach(f => f.required = true);
             bodegasFields.forEach(f => f.required = false);
