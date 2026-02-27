@@ -403,6 +403,7 @@ function buildContractData(rawData) {
         representante_rut: rep_rut,
 
         // Reps Multiple (New)
+        representante_nombre_lista: validRepsObj[0] ? validRepsObj[0].nombre : rawFirmaNombre,
         multiple_reps: multipleReps,
         reps_lista: formatRepsList,
         rep_unico: formatRepsList, // same string just grammar changes in word "representados" vs "representado" 
